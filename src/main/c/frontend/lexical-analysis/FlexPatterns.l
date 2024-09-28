@@ -15,6 +15,7 @@
  * @see https://westes.github.io/flex/manual/Start-Conditions.html
  */
 %x MULTILINE_COMMENT
+%x VARIABLE_DECLARATION
 
 /**
  * Reusable patterns.
@@ -24,6 +25,12 @@
  */
 
 %%
+
+"(let )|(const )"                   { BEGIN(VARIABLE_DECLARATION); return VariableModificatorLexemeAction(createLexicalAnalyzerContext()); } // If a "let " or "const " match, it creates a VARIABLE_DECLARATION context and a VariableModificator token. 
+<VARIABLE_DECLARATION>[[:space:]]+  { IgnoredLexemeAction(createLexicalAnalyzerContext()); } // Any spaces in the middle are ignored.
+<VARIABLE_DECLARATION>"="           { return DirectAssignmentOperatorLexemeAction(createLexicalAnalyzerContext()); } // Direct assignment operator token
+<VARIABLE_DECLARATION>";"           { EndSentenceLexemeAction(createLexicalAnalyzerContext); BEGIN(INITIAL) } // If a ";" match, it ends the VARIABLE_DECLARATION context.
+
 
 "/*"								{ BEGIN(MULTILINE_COMMENT); BeginMultilineCommentLexemeAction(createLexicalAnalyzerContext()); }
 <MULTILINE_COMMENT>"*/"				{ EndMultilineCommentLexemeAction(createLexicalAnalyzerContext()); BEGIN(INITIAL); }

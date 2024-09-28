@@ -23,11 +23,17 @@ void shutdownFlexActionsModule();
 
 void BeginMultilineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 void EndMultilineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+
+Token VariableModificatorLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+void EndSentenceLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+
 void IgnoredLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 
 Token ArithmeticOperatorLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token token);
 Token IntegerLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ParenthesisLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token token);
+
+Token DirectAssignmentOperatorLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 
 Token UnknownLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 

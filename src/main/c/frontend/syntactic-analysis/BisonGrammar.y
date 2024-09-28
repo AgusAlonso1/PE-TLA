@@ -45,6 +45,9 @@
 %token <token> OPEN_PARENTHESIS
 %token <token> SUB
 
+%token <token> VARIABLE_MODIFICATOR // Variable modificator -> "const" or "let"
+%token <token> DIRECT_ASSIGNMENT // Direct assignment operator -> "="
+
 %token <token> UNKNOWN
 
 /** Non-terminals. */

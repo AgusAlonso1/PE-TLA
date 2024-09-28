@@ -1,4 +1,7 @@
 #include "FlexActions.h"
+#include "LexicalAnalyzerContext.h"
+
+#define FIRST_CHAR_POS 0
 
 /* MODULE INTERNAL STATE */
 
@@ -46,6 +49,25 @@ void EndMultilineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerCon
 	if (_logIgnoredLexemes) {
 		_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	}
+}
+
+Token VariableModificatorLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
+    if (_logIgnoredLexemes) {
+        _logLexicalAnalyzerContext(__FUNCTION__,  lexicalAnalyzerContext);
+    }
+    lexicalAnalyzerContext->semanticValue->token = lexicalAnalyzerContext->lexeme[FIRST_CHAR_POS];
+    return  VARIABLE_MODIFICATOR;
+}
+
+void EndSentenceLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
+    if (_logIgnoredLexemes) {
+        _logLexicalAnalyzerContext(__FUNCTION__,  lexicalAnalyzerContext);
+    }
+}
+
+Token DirectAssignmentOperatorLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
+    _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+    return DIRECT_ASSIGNMENT;
 }
 
 void IgnoredLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
