@@ -30,14 +30,14 @@
 // Basic reusable patterns
 crlf            \r\n
 whitespace      [ \f\n\r\t\v]
-identifier      [a-zA-Z_$][a-zA-Z0-9_$]* // Identificadores
-string          \"([^\\\"]|\\.)*\" // Cadenas de texto
-number          [0-9]+(\.[0-9]+)? // Literales numéricos
-bool            (true|false) // Literales booleanos
-null            null // Literal null
-undefined       undefined // Literal undefined
-array           \[[^]]*\] // Array
-jsonObject      \{([^{}]|(?R))*\} // Objeto JSON, recursivo
+identifier      [a-zA-Z_$][a-zA-Z0-9_$]* 
+string          \"([^\\\"]|\\.)*\" 
+number          [0-9]+(\.[0-9]+)? 
+bool            (true|false) 
+null            null 
+undefined       undefined 
+array           \[[^]]*\] 
+jsonObject      \{([^{}]|(?R))*\} 
 
 // TypeScript-specific patterns
 function        function
