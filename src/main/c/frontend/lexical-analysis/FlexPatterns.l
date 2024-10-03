@@ -68,14 +68,14 @@ private         private
 protected       protected
 
 // Type patterns
-type            :\s*(string|number|boolean|any|unknown|never|void|\{[^}]*\}) // Anotación de tipo
-unionType      ({string}|{identifier}|\{identifier\}|\{type\}) // Tipo unión
-stringLiteral   \"([^\\\"]|\\.)*\" // Literales de cadena para tipo unión
+type            :\s*(string|number|boolean|any|unknown|never|void|\{[^}]*\}) //check
+unionType      ({string}|{identifier}|\{identifier\}|\{type\}) 
+stringLiteral   \"([^\\\"]|\\.)*\" 
 enumIdentifier  {identifier} // Identificador de enum
 
 // Arrow and async function patterns
 arrowFunc       {identifier}\s*=>  // Función de flecha
-params          \(\s*({identifier}(\s*:\s*{type})?\s*(,\s*{identifier}(\s*:\s*{type})?\s*)*)?\) // Parámetros de función
+params          \(\s*({identifier}(\s*:\s*{type})?\s*(,\s*{identifier}(\s*:\s*{type})?\s*)*)?\)
 
 // Control structures and loops
 forOf          for\s+({identifier}|{array})\s+of
@@ -91,7 +91,7 @@ relationalOp   (==|===|!=|!==|>|<|>=|<=)
 %%
 
 // Token definitions
-{whitespace}      {} // Ignorar espacios en blanco
+{whitespace}      {} 
 {string}          { return StringTokenPattern(yytext); }
 {number}          { return NumberTokenPattern(yytext); }
 {bool}            { return BooleanTokenPattern(yytext); }
