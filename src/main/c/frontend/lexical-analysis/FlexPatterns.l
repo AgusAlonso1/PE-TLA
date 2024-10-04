@@ -19,6 +19,7 @@
 %x VARIABLE_DECLARATION
 %x UNION_VARIABLES
 %x ENUM
+%x FUNCTION
 
 /**
  * Reusable patterns.
@@ -53,7 +54,7 @@ any 			(string|number|boolean|jsonObject)
 //variables
 "(let )|(const )"                   { BEGIN(VARIABLE_DECLARATION); return VariableModificatorLexemeAction(createLexicalAnalyzerContext()); } // If a "let " or "const " match, it creates a VARIABLE_DECLARATION context and a VariableModificator token. 
 <VARIABLE_DECLARATION>[[:space:]]+  { IgnoredLexemeAction(createLexicalAnalyzerContext()); } // Any spaces in the middle are ignored.
-<VARIABLE_DECLARATION>"(string|number|boolean|jsonObject|any)" { }
+<VARIABLE_DECLARATION>"(string|number|boolean|jsonObject|any)" { } //salteo 
 <VARIABLE_DECLARATION>"="           { return DirectAssignmentOperatorLexemeAction(createLexicalAnalyzerContext()); } // Direct assignment operator token
 <VARIABLE_DECLARATION>";"           { EndSentenceLexemeAction(createLexicalAnalyzerContext); BEGIN(INITIAL) } // If a ";" match, it ends the VARIABLE_DECLARATION context.
 
@@ -67,6 +68,12 @@ any 			(string|number|boolean|jsonObject)
 <ENUM>","                           { } //append 
 <ENUM>"\}"                          { BEGIN(INITIAL);}
 
+"function "
+<FUNCTION>[[:space:]]+              { IgnoredLexemeAction(createLexicalAnalyzerContext()); }
+<FUNCTION>"\("						{ BEGIN(FUNCTION); return FunctionLexemeAction(createLexicalAnalyzerContext()); }
+<FUNCTION>"\)"                      { return FunctionParamLexemeAction(); BEGIN(INITIAL); }
+<FUNCTION>"\{"                      { BEGIN(FUNCTION); }
+<FUNCTION>"\}"                      { return EndFunctionParamLexemeAction(); BEGIN(INITIAL); }
 
 
 "-"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), SUB); }
