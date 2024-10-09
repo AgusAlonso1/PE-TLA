@@ -39,4 +39,9 @@ Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 Token TypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
 
+Token EnumLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+
+Token BeginFunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token EndFunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+
 #endif

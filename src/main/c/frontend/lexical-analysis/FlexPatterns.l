@@ -19,7 +19,9 @@
 %x VARIABLE_DECLARATION
 %x UNION_VARIABLES
 %x ENUM
+%x INTERFACE
 %x FUNCTION
+
 
 /**
  * Reusable patterns.
@@ -40,6 +42,26 @@ undefined       undefined
 array           \[[^]]*\] 
 jsonObject      \{([^{}]|(?R))*\}
 any 			(string|number|boolean|jsonObject)
+
+"-"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), SUB); }
+"*"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), MUL); }
+"/"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), DIV); }
+"+"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), ADD); }
+
+":/s*string"							{ return TypeLexemeAction(createLexicalAnalyzerContext(), STRING); }
+":/s*number"							{ return TypeLexemeAction(createLexicalAnalyzerContext(), NUMBER); }
+":/s*boolean"							{ return TypeLexemeAction(createLexicalAnalyzerContext(), BOOLEAN); }
+":/s*jsonObject"						{ return TypeLexemeAction(createLexicalAnalyzerContext(), JSON_OBJECT); }
+":/s*any"								{ return TypeLexemeAction(createLexicalAnalyzerContext(), ANY); }
+":/s*unknown" 						    { return TypeLexemeAction(createLexicalAnalyzerContext(), UNKNOWN); }
+
+"("									{ return ParenthesisLexemeAction(createLexicalAnalyzerContext(), OPEN_PARENTHESIS); }
+")"									{ return ParenthesisLexemeAction(createLexicalAnalyzerContext(), CLOSE_PARENTHESIS); }
+
+[[:digit:]]+						{ return IntegerLexemeAction(createLexicalAnalyzerContext()); }
+
+[[:space:]]+						{ IgnoredLexemeAction(createLexicalAnalyzerContext()); }
+.									{ return UnknownLexemeAction(createLexicalAnalyzerContext()); }
 
 "//"
 <SINGLE_LINE_COMMENT>               { BEGIN(SINGLE_LINE_COMMENT); }
@@ -65,29 +87,26 @@ any 			(string|number|boolean|jsonObject)
 "enum "
 <ENUM>[[:space:]]+                  { IgnoredLexemeAction(createLexicalAnalyzerContext()); } // Any spaces in the middle are ignored.
 <ENUM>"\{"                          { BEGIN(ENUM) }
+<ENUM>":\s*(string|number)" 		{ return EnumLexemeAction(createLexicalAnalyzerContext());}
 <ENUM>","                           { } //append 
 <ENUM>"\}"                          { BEGIN(INITIAL);}
 
+"interface "
+<INTERFACE>[[:space:]]+             { IgnoredLexemeAction(createLexicalAnalyzerContext()); }
+<INTERFACE>"[a-zA-Z_$][a-zA-Z0-9_$]*" { char *interfaceName = strdup(yytext); return BeginInterfaceLexemeAction(createLexicalAnalyzerContext(), interfaceName); } // check interface name param
+
 "function "
 <FUNCTION>[[:space:]]+              { IgnoredLexemeAction(createLexicalAnalyzerContext()); }
+<FUNCTION>"[a-zA-Z_$][a-zA-Z0-9_$]*" { char *functionName = strdup(yytext); return BeginFunctionLexemeAction(createLexicalAnalyzerContext(), functionName); } // check function name param
 <FUNCTION>"\("						{ BEGIN(FUNCTION); return FunctionLexemeAction(createLexicalAnalyzerContext()); }
+<FUNCTION>":\s*(string|number|boolean|any)"	{  TypeLexemeAction(createLexicalAnalyzerContext,)} // despues se declara el tipo de retorno
+<FUNCTION>"," 					 	{ } //append variables 
 <FUNCTION>"\)"                      { return FunctionParamLexemeAction(); BEGIN(INITIAL); }
 <FUNCTION>"\{"                      { BEGIN(FUNCTION); }
 <FUNCTION>"\}"                      { return EndFunctionParamLexemeAction(); BEGIN(INITIAL); }
 
 
-"-"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), SUB); }
-"*"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), MUL); }
-"/"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), DIV); }
-"+"									{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), ADD); }
 
-"("									{ return ParenthesisLexemeAction(createLexicalAnalyzerContext(), OPEN_PARENTHESIS); }
-")"									{ return ParenthesisLexemeAction(createLexicalAnalyzerContext(), CLOSE_PARENTHESIS); }
-
-[[:digit:]]+						{ return IntegerLexemeAction(createLexicalAnalyzerContext()); }
-
-[[:space:]]+						{ IgnoredLexemeAction(createLexicalAnalyzerContext()); }
-.									{ return UnknownLexemeAction(createLexicalAnalyzerContext()); }
 
 %%
 
