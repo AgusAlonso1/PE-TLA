@@ -100,10 +100,9 @@ Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 }
 
 // Handle basic types like strings, numbers, booleans, null, and undefined
-Token TypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
+Token SingleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->token = token;
-	return token;
+	lexicalAnalyzerContext->semanticValue->type = lexicalAnalyzerContext->lexeme;
 }
 
 Token EnumLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {

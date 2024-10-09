@@ -9,7 +9,7 @@
 
 %union {
 	/** Terminals. */
-
+	char * type;
 	int integer;
 	Token token;
 

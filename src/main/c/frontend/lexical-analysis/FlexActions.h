@@ -37,7 +37,7 @@ Token DirectAssignmentOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyz
 
 Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
-Token TypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token SingleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 Token EnumLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
