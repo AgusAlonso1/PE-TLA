@@ -8,16 +8,17 @@
 %define api.value.union.name SemanticValue
 
 %union {
-	/** Terminals. */
-
-	int integer;
+	/** Terminals */
+	char * keyword;        // "let", "const", "function"
+	char * type;
+	char * symbol;
 	Token token;
 
-	/** Non-terminals. */
-
-	Constant * constant;
-	Expression * expression;
-	Factor * factor;
+	/** Non-terminals */
+	char * identifier;     // variable or function names
+	Expression * expression;  // Arithmetic, logical, etc.
+	Statement * statement;   // if, for, etc.
+	Declaration * declaration; // For handling variable, function, or class declarations
 	Program * program;
 }
 
@@ -37,7 +38,6 @@
 */
 
 /** Terminals. */
-%token <integer> INTEGER
 %token <token> ADD
 %token <token> CLOSE_PARENTHESIS
 %token <token> DIV
@@ -45,12 +45,16 @@
 %token <token> OPEN_PARENTHESIS
 %token <token> SUB
 
-%token <token> UNKNOWN
+%token <token> TYPE
+
+%token <token> VARIABLE_MODIFICATOR // Variable modificator -> "const" or "let"
+%token <token> DIRECT_ASSIGNMENT // Direct assignment operator -> "="
 
 /** Non-terminals. */
-%type <constant> constant
+%type <identifier> identifier
 %type <expression> expression
-%type <factor> factor
+%type <statement> statement
+%type <declaration> declaration
 %type <program> program
 
 /**
