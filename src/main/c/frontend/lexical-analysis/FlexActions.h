@@ -38,10 +38,12 @@ Token DirectAssignmentOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyz
 Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 Token SingleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+void MultipleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
+void IdentifierLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+void ConditionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 Token EnumLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
-
-Token BeginFunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
-Token EndFunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token ForLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token FunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 #endif

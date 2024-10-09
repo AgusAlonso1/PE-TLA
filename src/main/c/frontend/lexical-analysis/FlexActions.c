@@ -55,8 +55,13 @@ Token VariableModificatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerCon
 	if (_logIgnoredLexemes) {
 		_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	}
-	lexicalAnalyzerContext->semanticValue->token = lexicalAnalyzerContext->lexeme[FIRST_CHAR_POS];
+	lexicalAnalyzerContext->semanticValue->token = lexicalAnalyzerContext->lexeme[FIRST_CHAR_POS]; // l or c => let or const
 	return VARIABLE_MODIFICATOR;
+}
+
+void IdentifierLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->identifier = lexicalAnalyzerContext->lexeme;
 }
 
 void EndSentenceLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
@@ -94,45 +99,56 @@ Token ParenthesisLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, To
 	return token;
 }
 
+Token BracesLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
 Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	return UNKNOWN;
 }
 
 // Handle basic types like strings, numbers, booleans, null, and undefined
+Token TypeDeclarationLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	return TYPE_DECLARATION;
+}
+
 Token SingleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->type = lexicalAnalyzerContext->lexeme;
+	return TYPE;
+}
+
+void MultipleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	char *token = strtok(lexicalAnalyzerContext->lexeme, "|");
+	for (int i = 0; token != NULL; i++) {
+		lexicalAnalyzerContext->semanticValue->type = token;
+		token = strtok(token, "|");
+	}
+	return TYPE;
 }
 
 Token EnumLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->type = lexicalAnalyzerContext->lexeme;
 	return ENUM;
 }
 
-Token BeginInterfaceLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, char *interfaceName) { // ver como usar nombre de interfaz
+void ConditionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	return INTERFACE;
+	lexicalAnalyzerContext->semanticValue->statement = lexicalAnalyzerContext->lexeme;
 }
 
-Token ForLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext){
+Token ForLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	return FOR;
-}
-
-
-Token BeginFunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, char *functionName) { // ver como usar nombre de funcion
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->string = functionName;
-	return FUNCTION;
 }
 
 Token FunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	return FUNCTION;
-}
-
-Token EndFunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	return END_FUNCTION;
 }
