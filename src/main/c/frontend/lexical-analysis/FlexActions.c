@@ -116,6 +116,12 @@ Token BeginInterfaceLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext,
 	return INTERFACE;
 }
 
+Token ForLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	return FOR;
+}
+
+
 Token BeginFunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, char *functionName) { // ver como usar nombre de funcion
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->string = functionName;
