@@ -59,11 +59,6 @@ Token VariableModificatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerCon
 	return VARIABLE_MODIFICATOR;
 }
 
-void IdentifierLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->identifier = lexicalAnalyzerContext->lexeme;
-}
-
 void EndSentenceLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	if (_logIgnoredLexemes) {
 		_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
@@ -81,74 +76,77 @@ void IgnoredLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	}
 }
 
+Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	return UNKNOWN;
+}
+
+// ID -----------------------------------------------------------------------------------------------
+void IdentifierLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->id = lexicalAnalyzerContext->lexeme;
+}
+
+// Operators ----------------------------------------------------------------------------------------
 Token ArithmeticOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
 }
 
-Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->integer = atoi(lexicalAnalyzerContext->lexeme);
-	return INTEGER;
-}
-
-Token ParenthesisLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
+Token ComparisonOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
 }
 
-Token BracesLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
+Token LogicalOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
 }
 
-Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+Token AssignmentOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	return UNKNOWN;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+Token ValueLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->value = lexicalAnalyzerContext->lexeme;
+	return VALUE;
 }
 
-// Handle basic types like strings, numbers, booleans, null, and undefined
-Token TypeDeclarationLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+// Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+// 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+// 	lexicalAnalyzerContext->semanticValue->integer = atoi(lexicalAnalyzerContext->lexeme);
+// 	return INTEGER;
+// }
+
+// Delimiters ----------------------------------------------------------------------------------------
+Token DelimiterLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	return TYPE_DECLARATION;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
 }
 
+// Variable declaration ------------------------------------------------------------------------------
+Token VariableDeclarationLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+// Types ---------------------------------------------------------------------------------------------
 Token SingleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->type = lexicalAnalyzerContext->lexeme;
-	return TYPE;
+	return SINGLE_TYPE;
 }
 
-void MultipleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+// Keywords ------------------------------------------------------------------------------------------
+Token KeywordLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	char *token = strtok(lexicalAnalyzerContext->lexeme, "|");
-	for (int i = 0; token != NULL; i++) {
-		lexicalAnalyzerContext->semanticValue->type = token;
-		token = strtok(token, "|");
-	}
-	return TYPE;
-}
-
-Token EnumLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->type = lexicalAnalyzerContext->lexeme;
-	return ENUM;
-}
-
-void ConditionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->statement = lexicalAnalyzerContext->lexeme;
-}
-
-Token ForLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	return FOR;
-}
-
-Token FunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	return FUNCTION;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
 }

@@ -30,20 +30,14 @@ void EndSentenceLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 void IgnoredLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 Token ArithmeticOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token ComparisonOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token LogicalOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token AssignmentOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token ValueLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
-Token ParenthesisLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
-
-Token DirectAssignmentOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 Token SingleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
-void MultipleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
-
-void IdentifierLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
-void ConditionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
-Token EnumLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
-Token ForLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
-Token FunctionLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 #endif
