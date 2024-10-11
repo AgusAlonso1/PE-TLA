@@ -12,18 +12,19 @@
 	char * single_type;
 	char * id;
 	char * value;
+	char *error;
 	Token token;
 
 	/** Non-terminals */
 	Declaration * declaration; 
+
 	Type * type;
-	Interface * interface;
 	VariableType * variableType;
 	AssignmentList * assignmentList;
 	VariableList * variableList;
+	ValueList * valueList;
 	Enum * enum;
-
-	Program * program;
+	Interface * interface;
 
 	AssignOperator * assignOperator;
 	Assign * assign;
@@ -32,16 +33,29 @@
 	AritmeticOperator * arithmeticOperator;
 	LogicalOperator * logicalOperator;
 	ComparisonOperator * comparisonOperator;
+	UnaryOperator * unaryOperator;
+	UnaryExpresion * unaryExpresion;
+	Factor * factor;
+
+	VariableModifier * variableModifier;
+	IterableVariable * iterableVariable;
+	ParamsFor * paramsFor;
+	For * for;
+	If *if;
+	While * while;
+	TryCatch * tryCatch;
 
 	ReturnType * returnType;
 	PromiseReturnType * promiseReturnType;
 
-	Code * code;
-	ValueList * valueList;
+	Function * function; 
+	ArrowFunction * arrowFunction;
 	AsyncFunction * asyncFunction;
-	VariableModifier * variableModifier;
-	IterableVariable * iterableVariable;
-	ParamsFor * paramsFor;
+	Await * await;
+	FunctionCall * functionCall;
+
+	Code * code;
+	Program * program;
 }
 
 /**
@@ -63,6 +77,7 @@
 %token <token> FUNCTION
 %token <token> IF
 %token <token> FOR
+%token <token> WHILE
 %token <token> INTERFACE
 %token <token> ENUM
 %token <token> ELSE
@@ -74,6 +89,8 @@
 %token <token> VAR
 
 %token <single_type> SINGLE_TYPE
+%token <error> ERROR 
+%token <token> CONSOLE_ERROR
 
 %token <id> ID 
 %token <token> COLON
@@ -88,6 +105,8 @@
 %token <token> OPEN_PARENTHESIS
 %token <token> CLOSE_PARENTHESIS
 
+%token <token> INCREMENT
+%token <token> DECREMENT
 
 %token <token> ADD
 %token <token> DIV
@@ -96,6 +115,7 @@
 
 %token <token> OR
 %token <token> AND
+%token <token> NOT
 %token <token> GREATER
 %token <token> LESS
 %token <token> NEQUAL
@@ -112,31 +132,59 @@
 %token <token> ARROW
 %token <token> AYSNC
 %token <token> PROMISE
+%token <token> AWAIT
+%token <token> TRY 
+%token <token> CATCH 
 
 
 /** Non-terminals. */
-%type <type> type
-%type <assign> assign
-%type <assignOperator> assignOperator
-%type <variableType> variableType
 %type <declaration> declaration
-%type <interface> interface
-%type <assignmentList> assignmentList
-%type <variableList> variableList
-%type <returnType> returnType
-%type <enum> enum
-%type <arithmeticOperator> arithmeticOperator
-%type <logicalOperator> logicalOperator
-%type <expression> expression
-%type <comparisonOperator> comparisonOperator
-%type <program> program
-%type <code> code
-%type <valueList> valueList
-%type <asyncFunction> asyncFunction
-%type <promiseReturnType> promiseReturnType
+%type <type> type
+
+%type <variableType> variableType
 %type <variableModifier> variableModifier
 %type <iterableVariable> iterableVariable
+
+%type <valueList> valueList
+%type <assignmentList> assignmentList
+%type <variableList> variableList
+
+
+%type <assign> assign
+%type <assignOperator> assignOperator
+
+%type <enum> enum
+%type <interface> interface
+
+%type <arithmeticOperator> arithmeticOperator
+%type <logicalOperator> logicalOperator
+%type <comparisonOperator> comparisonOperator
+%type <unaryOperator> unaryOperator
+%type <unaryExpresion> unaryExpresion
+%type <expression> expression
+
+
+%type <returnType> returnType
+%type <promiseReturnType> promiseReturnType
+%type <await> await
+
+%type <if> if
+%type <for> for
+%type <while> while
+%type <tryCatch> tryCatch
+
+%type <function> function
+%type <arrowFunction> arrowFunction
+%type <asyncFunction> asyncFunction
+%type <functionCall> functionCall
+
 %type <paramsFor> paramsFor
+
+
+%type <factor> factor
+%type <program> program
+%type <code> code
+
 
 
 /**
@@ -186,35 +234,51 @@ logicalOperator: OR 																{ $$ = OR_OP; }
 	| AND 																			{ $$ = AND_OP; }
 	;
 
+unaryOperator: INCREMENT 															{ $$ = INC_OP; }
+	| DECREMENT 																	{ $$ = DEC_OP; }
+	;
+
+unaryExpresion: ID unaryOperator 													{ $$ = 	UnaryExpressionSemanticAction($1,unaryOperator, right); }
+	| OPEN_PARENTHESIS unaryExpresion CLOSE_PARENTHESIS unaryOperator				{ $$ = 	UnaryExpressionSemanticAction($1,unaryOperator, right); }
+	| unaryOperator ID 																{ $$ =  UnaryExpressionSemanticAction($1,unaryOperator, left); }
+	| unaryOperator OPEN_PARENTHESIS unaryExpresion CLOSE_PARENTHESIS				{ $$ =  UnaryExpressionSemanticAction($1,unaryOperator, left); }
+	;
+
 expression: expression[left] arithmeticOperator expression[right]					{ $$ = ArithmeticExpressionSemanticAction($left, $right, arithmeticOperator); }
 	| expression[left] logicalOperator expression[right]							{ $$ = LogicalExpressionSemanticAction($left, $right, logicalOperator); }
 	| expression[left] comparisonOperator expression[right]							{ $$ = ComparisonExpressionSemanticAction($left, $right, comparisonOperator); }
-	| OPEN_PARENTHESIS expression CLOSE_PARENTHESIS									{ $$ = FactorSemanticAction($2); }
-	| ID 
-	| VALUE
-	| functionCall
+	| NOT expression 																{ $$ = NotExpressionSemanticAction($1); }
+	| factor																		{ $$ = FactorExpressionSemanticAction($1); }
 	;
 
+factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS								{ $$ = ExpressionFactorSemanticAction($2); }
+	| ID 																			{ $$ = VariableFactorSemanticAction($1); }
+	| VALUE 																		{ $$ = ValueFactorSemanticAction($1); }
+	| functionCall 																	{ $$ = FunctionFactorSemanticAction($1) }
+	;
+	
 // Type -------------------------------------------------------------------------------------------------------------------------------------------------
 type: SINGLE_TYPE																    { $$ = SingleTypeSemanticAction($1); }
 	| SINGLE_TYPE PIPE type															{ $$ = UnionTypeSemanticAction($1, $3); }
 	;
 
 variableType: ID COLON type															{ $$ = VariableSemanticAction($1, $3); }
-	| ID
+	| ID																			{ $$ = VariableSemanticAction($1, NULL); } // CHECK
 	;
 
-returnType: COLON type																{ $$ = ReturnTypeSemanticAction($2); } // debe haber mas casos 
+returnType: COLON type																{ $$ = ReturnTypeSemanticAction($2); }
+	| %empty 																		{ $$ = ReturnTypeSemanticAction(NULL); } //check
 	;
 
-promiseReturnType: PROMISE GREATER returnType GREATER								{ $$ = PromiseReturnTypeSemanticAction($2); }
+promiseReturnType: PROMISE GREATER returnType LESS									{ $$ = PromiseReturnTypeSemanticAction($2); }
+	| %empty																		{ $$ = PromiseReturnTypeSemanticAction(NULL); }
 	;
 
 // Variable declaration and assignment -----------------------------------------------------------------------------------------------------------------
-declaration: LET variableType assign											    { $$ = LetDeclarationSemanticAction($2, $4); }
+declaration: LET variableType assign											    { $$ = LetDeclarationSemanticAction($2, $3); }
 	| CONST variableType EQUAL VALUE 							       				{ $$ = ConstDeclarationSemanticAction($2,$4); }
-	| VAR variableType assign														{ $$ = VarDeclarationSemanticAction($2, $4); }
-	| declaration COMA variableType													{ $$ = MultipleDeclarationSemanticAction($1, $2); } // pensar mejor  VER
+	| VAR variableType assign														{ $$ = VarDeclarationSemanticAction($2, $3); }
+	| declaration COMA variableType													{ $$ = MultipleDeclarationSemanticAction($1, $3); } // pensar mejor  VER
 	;
 
 assignOperator: EQUAL 															    { $$ = EQUAL_OP; }
@@ -253,14 +317,15 @@ iterableVariable: ID  																{ $$ = IterableVariableSemanticAction($1);
 enum: ENUM ID OPEN_BRACE assignmentList CLOSE_BRACE									{ $$ = EnumSemanticAction($2, $4); }
 	;
 
-interface: INTERFACE ID OPEN_BRACE declaration CLOSE_BRACE							{ $$ = InterfaceSemanticAction($2, $4); }
+interface: INTERFACE ID OPEN_BRACE variableList CLOSE_BRACE							{ $$ = InterfaceSemanticAction($2, $4); }
 	;
 
 // if -----------------------------------------------------------------------------------------------------------------
-if: IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE
-	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE ELSE OPEN_BRACE code CLOSE_BRACE
+if: IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE 										{ $$ = IfSemanticAction($3, $6, NULL); }
+	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE ELSE OPEN_BRACE code CLOSE_BRACE 	{ $$ = IfSemanticAction($3, $6, $10); }
 	;
-//for ... of, no con for ... in -----------------------------------------------------------------------------------------------------------------
+	
+//for -----------------------------------------------------------------------------------------------------------------
 paramsFor: OPEN_PARENTHESIS declaration SEMI_COLON expression SEMI_COLON assign CLOSE_PARENTHESIS
 	| OPEN_PARENTHESIS variableModifier ID OF iterableVariable CLOSE_PARENTHESIS
 	| OPEN_PARENTHESIS variableModifier ID IN iterableVariable CLOSE_PARENTHESIS
@@ -269,20 +334,29 @@ paramsFor: OPEN_PARENTHESIS declaration SEMI_COLON expression SEMI_COLON assign 
 for: FOR paramsFor OPEN_BRACE code CLOSE_BRACE
 	;
 
+//while -----------------------------------------------------------------------------------------------------------------
+while: WHILE OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE 									{ $$ = WhileSemanticAction($3, $6); }
+	;
+
+// try catch -----
+await: AWAIT expression
+	;
+
+tryCatch: TRY OPEN_BRACE code CLOSE_BRACE CATCH OPEN_PARENTHESIS ERROR CLOSE_PARENTHESIS OPEN_BRACE CONSOLE_ERROR CLOSE_BRACE
+	;
+
+
 // function -----------------------------------------------------------------------------------------------------------------
-functionCall: ID OPEN_PARENTHESIS valueList CLOSE_PARENTHESIS
+functionCall: ID OPEN_PARENTHESIS valueList CLOSE_PARENTHESIS 															{ $$ = functionCallSemanticAction($1,$3); }
 	;
 
-function: FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS returnType OPEN_BRACE code CLOSE_BRACE
-	| FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE
+function: FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS returnType OPEN_BRACE code CLOSE_BRACE { $$ = FunctionSemanticAction($2,$4,$6,$8)}
 	;
 
-arrowFunction: OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS ARROW COLON returnType OPEN_BRACE code CLOSE_BRACE
-	| OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS ARROW OPEN_BRACE code CLOSE_BRACE
+arrowFunction: OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS ARROW COLON returnType OPEN_BRACE code CLOSE_BRACE { $$ = ArrowFunctionSemanticAction($2,$5,$8); }
 	;
 
-asyncFunction: AYSNC FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS COLON promiseReturnType OPEN_BRACE code CLOSE_BRACE
- 	| AYSNC FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE
+asyncFunction: AYSNC FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS COLON promiseReturnType OPEN_BRACE code CLOSE_BRACE { $$ = AsyncFunctionSemanticAction($3,$4,$8,$10); }
 	;
 
 %%

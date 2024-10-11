@@ -27,16 +27,25 @@ void releaseExpression(Expression * expression) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (expression != NULL) {
 		switch (expression->type) {
-			case ADDITION:
-			case DIVISION:
-			case MULTIPLICATION:
-			case SUBTRACTION:
+			case ADD_OP:
+			case DIV_OP:
+			case MUL_OP:
+			case SUB_OP:
 				releaseExpression(expression->leftExpression);
 				releaseExpression(expression->rightExpression);
 				break;
 			case FACTOR:
 				releaseFactor(expression->factor);
 				break;
+			case GREATER_OP:
+			case GREATER_EQUAL_OP:
+			case LESS_OP:
+			case LESS_EQUAL_OP:
+			case NEQUAL_OP:
+			case STRICT_EQUAL_OP:
+			case STRICT_NEQUAL_OP:
+			case OR_OP:
+			case AND_OP:
 		}
 		free(expression);
 	}

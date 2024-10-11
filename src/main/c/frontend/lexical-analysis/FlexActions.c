@@ -150,3 +150,20 @@ Token KeywordLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token 
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
 }
+
+//error ----
+Token ErrorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	
+	char *errorStart = strstr(LexicalAnalyzerContext->lexeme, ", ") + 2;
+    char *errorEnd = strstr(errorStart, ")");
+
+    int errorLength = errorEnd - errorStart;
+	char *error;
+    strncpy(error, errorStart, errorLength);
+    error[errorLength] = '\0';
+
+	lexicalAnalyzerContext->error = error;
+
+	return CONSOLE_ERROR;
+}

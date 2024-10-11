@@ -61,7 +61,6 @@ val 		    (string|number|boolean)
 "!=="                                                                       { return ComparisonOperatorLexemeAction(createLexicalAnalyzerContext(), STRICT_NEQUAL); } 
 "<="                                                                        { return ComparisonOperatorLexemeAction(createLexicalAnalyzerContext(), LESS_EQUAL); }
 ">="                                                                        { return ComparisonOperatorLexemeAction(createLexicalAnalyzerContext(), GREATER_EQUAL); }
-"<="                                                                       { return ComparisonOperatorLexemeAction(createLexicalAnalyzerContext(), LESS_EQUAL); }
 
 // Logical Operators
 "&&"                                                                        { return LogicalOperatorLexemeAction(createLexicalAnalyzerContext(), ADD); }
@@ -73,8 +72,9 @@ val 		    (string|number|boolean)
 "*="                                                                        { return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), MUL_ASSIGN); }
 "/="                                                                        { return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), DIV_ASSIGN); }
 {val}                                                                       { return ValueLexemeAction(createLexicalAnalyzerContext()); }
-"++"                                                                        { return IncrementLexemeAction(createLexicalAnalyzerContext()); }
-"--"                                                                        { return DecrementLexemeAction(createLexicalAnalyzerContext()); }
+"++"                                                                        { return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), INCREMENT); }
+"--"                                                                        { return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), DECREMENT); }
+"!"																			{ return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), NOT); }
 
 // Delimiters
 "("									                                        { return DelimiterLexemeAction(createLexicalAnalyzerContext(), OPEN_PARENTHESIS); }
@@ -107,10 +107,13 @@ val 		    (string|number|boolean)
 "in"                                                                        { return KeywordLexemeAction(createLexicalAnalyzerContext(), IN); }
 
 //function
-"=>" 																	   { return KeywordLexemeAction(createLexicalAnalyzerContext(), ARROW); }
+"=>" 																	   	{ return KeywordLexemeAction(createLexicalAnalyzerContext(), ARROW); }
 "async"                                                                     { return KeywordLexemeAction(createLexicalAnalyzerContext(), ASYNC); }
 "Promise"                                                                   { return KeywordLexemeAction(createLexicalAnalyzerContext(), PROMISE); }
+"try"                                                                       { return KeywordLexemeAction(createLexicalAnalyzerContext(), TRY); }
+"catch"                                                                   	{ return KeywordLexemeAction(createLexicalAnalyzerContext(), CATCH); }
 
+"console.error(" [^,]+ "," [^,]+ ")"  										{return ErrorLexemeAction(createLexicalAnalyzerContext()); }
 
 [[:digit:]]+						                                        { return IntegerLexemeAction(createLexicalAnalyzerContext()); }
 
