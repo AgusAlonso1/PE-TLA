@@ -262,8 +262,8 @@ type: SINGLE_TYPE																    { $$ = SingleTypeSemanticAction($1); }
 	| SINGLE_TYPE PIPE type															{ $$ = UnionTypeSemanticAction($1, $3); }
 	;
 
-variableType: ID COLON type															{ $$ = VariableSemanticAction($1, $3); }
-	| ID																			{ $$ = VariableSemanticAction($1, NULL); } // CHECK
+variableType: ID COLON type															{ $$ = VariableTypeSemanticAction($1, $3); }
+	| ID																			{ $$ = VariableTypeSemanticAction($1, NULL); } // CHECK
 	;
 
 returnType: COLON type																{ $$ = ReturnTypeSemanticAction($2); }
@@ -275,10 +275,12 @@ promiseReturnType: PROMISE GREATER returnType LESS									{ $$ = PromiseReturnT
 	;
 
 // Variable declaration and assignment -----------------------------------------------------------------------------------------------------------------
-declaration: LET variableType assign											    { $$ = LetDeclarationSemanticAction($2, $3); }
-	| CONST variableType EQUAL VALUE 							       				{ $$ = ConstDeclarationSemanticAction($2,$4); }
-	| VAR variableType assign														{ $$ = VarDeclarationSemanticAction($2, $3); }
-	| declaration COMA variableType													{ $$ = MultipleDeclarationSemanticAction($1, $3); } // pensar mejor  VER
+declaration: LET variableType EQUAL expression										{ $$ = DeclarationSemanticAction(0, $2, $4); }
+	| LET variableType																{ $$ = DeclarationSemanticAction(0, $2, NULL); }
+	| CONST variableType EQUAL expression 								       		{ $$ = DeclarationSemanticAction(1, $2, $4); }
+	| VAR variableType EQUAL expression												{ $$ = DeclarationSemanticAction(2, $2, $4); }
+	| VAR variableType																{ $$ = DeclarationSemanticAction(2, $2, NULL); }
+//	| declaration COMA variableType													{ } // VER
 	;
 
 assignOperator: EQUAL 															    { $$ = EQUAL_OP; }
@@ -300,8 +302,8 @@ variableList: variableType															{ $$ = InterfaceListSemanticAction($1);
 	| variableType COMA variableList												{ $$ = MultipleInterfaceListSemanticAction($1, $2); }
 	;
 
-valueList: VALUE																	{ $$ = ValueListSemanticAction($1); }
-	| valueList COMA VALUE															{ $$ = MultipleValueListSemanticAction($1, $3); }
+valueList: expression																	{ $$ = ValueListSemanticAction($1); }
+	| expression COMA valueList															{ $$ = MultipleValueListSemanticAction($1, $3); }
 	;
 
 variableModifier: LET

@@ -135,15 +135,14 @@ DataType getDataType(char * name) {
 	return ANY;
 }
 
-Variable * VariableSemanticAction(char * id, char * typeName) {
+VariableType * VariableTypeSemanticAction(char * id, Type * typeName) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Variable * variable = malloc(sizeof(Variable));
-	variable->id = malloc(strlen(id) + 1);
-	strcpy(variable->id, id);
-	variable->type = getDataType(typeName);	
-	variable->type = typeName;
-	
-	return variable;
+	VariableType * variableType = malloc(sizeof(VariableType));
+	variableType->id = malloc(strlen(id) + 1);
+	strcpy(variableType->id, id);
+	variableType->type = getDataType(typeName);	
+	variableType->type = typeName;
+	return variableType;
 }
 
 
@@ -161,6 +160,14 @@ PromiseReturn * PromiseReturnSemanticAction(Type *returnType) {
 	return promiseReturn;
 }
 
-Declaration * LetDeclarationSemanticAction() {
-	
+Declaration * DeclarationSemanticAction(Token token, VariableType *variableType, Expression *expression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Declaration *declaration = malloc(sizeof(Declaration));
+	declaration->variable = malloc(sizeof(Variable));
+	declaration->variable->variableType = variableType;
+	declaration->variable->value = expression;
+	declaration->type = token;
 }
+
+
+

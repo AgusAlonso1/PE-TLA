@@ -28,6 +28,9 @@ typedef union Type Type;
 typedef struct Variable Variable;
 typedef struct PromiseReturn PromiseReturn;
 typedef struct Declaration Declaration;
+typedef struct FunctionCall FunctionCall;
+typedef struct ValueList ValueList;
+typedef struct VariableType VariableType;
 
 
 /**
@@ -54,7 +57,8 @@ enum ExpressionType {
 
 enum FactorType {
 	CONSTANT,
-	EXPRESSION
+	VARIABLE,
+	FUNCTIONCALL
 };
 
 enum DeclarationType {
@@ -97,27 +101,31 @@ struct Constant {
 	DataType type;
 };
 
-struct Variable {
+struct VariableType {
 	char * id;
 	DataType type;
 };
+
+struct Variable {
+	VariableType * variableType;
+	Expression * value;
+};
+
 
 struct PromiseReturn {
 	Type *type;
 };
 
 struct Declaration {
-	DeclarationType type;
-	union{
-		Variable *variable;
-		Function *function;
-	}
+	DeclarationType type;	
+	Variable *variable;
 };
 
 struct Factor {
 	union {
 		Constant * constant;
-		Expression * expression;
+		Variable * expression;
+		FunctionCall * functionCall;
 	};
 	FactorType type;
 };
@@ -131,6 +139,16 @@ struct Expression {
 		};
 	};
 	ExpressionType type;
+};
+
+struct FunctionCall {
+	char * id;
+	ValueList * arguments;
+};
+
+struct ValueList {
+	Expression * expression;
+	ValueList * next;
 };
 
 struct Program {
