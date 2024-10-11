@@ -84,7 +84,7 @@ val 		    (string|number|boolean)
 ","									                                        { return DelimiterLexemeAction(createLexicalAnalyzerContext(), COMA); }
 ";"									                                        { return DelimiterLexemeAction(createLexicalAnalyzerContext(), SEMI_COLON); }
 ":"									                                        { return DelimiterLexemeAction(createLexicalAnalyzerContext(), COLON); }
-"|"                                                                         { return DelimiterLexemeAction(createLexicalAnalyzerContext(), UNION); }
+"|"                                                                         { return DelimiterLexemeAction(createLexicalAnalyzerContext(), PIPE); }
 
 
 // Variable Keywords 
@@ -103,7 +103,13 @@ val 		    (string|number|boolean)
 "return"                                                                    { return KeywordLexemeAction(createLexicalAnalyzerContext(), RETURN); }
 "interface"                                                                 { return KeywordLexemeAction(createLexicalAnalyzerContext(), INTERFACE); }
 "enum"                                                                      { return KeywordLexemeAction(createLexicalAnalyzerContext(), ENUM); }
+"of"                                                                        { return KeywordLexemeAction(createLexicalAnalyzerContext(), OF); }
+"in"                                                                        { return KeywordLexemeAction(createLexicalAnalyzerContext(), IN); }
 
+//function
+"=>" 																	   { return KeywordLexemeAction(createLexicalAnalyzerContext(), ARROW); }
+"async"                                                                     { return KeywordLexemeAction(createLexicalAnalyzerContext(), ASYNC); }
+"Promise"                                                                   { return KeywordLexemeAction(createLexicalAnalyzerContext(), PROMISE); }
 
 
 [[:digit:]]+						                                        { return IntegerLexemeAction(createLexicalAnalyzerContext()); }
