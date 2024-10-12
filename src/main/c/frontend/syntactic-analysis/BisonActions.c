@@ -31,33 +31,74 @@ static void _logSyntacticAnalyzerAction(const char *functionName) {
 
 /* PUBLIC FUNCTIONS */
 
-DataType getDataType(char * name);
+DataType getDataType(char *name);
 
-Constant * IntegerConstantSemanticAction(const int value) {
+Constant *IntValueSemanticAction(int value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Constant *constant = calloc(1, sizeof(Constant));
-	constant->value = value;
+	Constant *constant = malloc(sizeof(Constant));
+	constant->type = NUMBER;
+	constant->integer = value;
 	return constant;
 }
 
-Expression * ArithmeticExpressionSemanticAction(Expression *leftExpression, Expression *rightExpression, ExpressionType type) {
+Constant *FloatValueSemanticAction(float value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Expression *expression = calloc(1, sizeof(Expression));
-	expression->leftExpression = leftExpression;
-	expression->rightExpression = rightExpression;
+	Constant *constant = malloc(sizeof(Constant));
+	constant->type = NUMBER;
+	constant->floating = value;
+	return constant;
+}
+
+Constant *StringValueSemanticAction(char *value) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Constant *constant = malloc(sizeof(Constant));
+	constant->type = STRING;
+	constant->string = malloc(strlen(value) + 1);
+	strcpy(constant->string, value);
+	return constant;
+}
+
+Constant *BooleanValueSemanticAction(char value) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Constant *constant = malloc(sizeof(Constant));
+	constant->type = BOOLEAN;
+	constant->boolean = value;
+	return constant;
+}
+
+Expression *ExpressionSemanticAction(Expression *leftExpression, Expression *rightExpression, ExpressionType type) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Expression *expression = malloc(sizeof(Expression));
 	expression->type = type;
+	switch (type) {
+		case NOT_OP:
+			expression->expression = leftExpression;
+			break;
+		default:
+			expression->leftExpression = leftExpression;
+			expression->rightExpression = rightExpression;
+			break;
+	}
 	return expression;
 }
 
-Expression * FactorExpressionSemanticAction(Factor *factor) {
+IncDec *IncDecSemanticAction(Expression *expression, IncDecType type, IncDecPosition position) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Expression *expression = calloc(1, sizeof(Expression));
+	IncDec *incDecExpression = malloc(sizeof(IncDec));
+	incDecExpression->expression = expression;
+	incDecExpression->type = type;
+	return incDecExpression;
+}
+
+Expression *FactorExpressionSemanticAction(Factor *factor) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Expression *expression = malloc(sizeof(Expression));
 	expression->factor = factor;
 	expression->type = FACTOR;
 	return expression;
 }
 
-Factor * ConstantFactorSemanticAction(Constant *constant) {
+Factor *ConstantFactorSemanticAction(Constant *constant) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Factor *factor = calloc(1, sizeof(Factor));
 	factor->constant = constant;
@@ -65,7 +106,7 @@ Factor * ConstantFactorSemanticAction(Constant *constant) {
 	return factor;
 }
 
-Factor * ExpressionFactorSemanticAction(Expression *expression) {
+Factor *ExpressionFactorSemanticAction(Expression *expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Factor *factor = calloc(1, sizeof(Factor));
 	factor->expression = expression;
@@ -73,22 +114,7 @@ Factor * ExpressionFactorSemanticAction(Expression *expression) {
 	return factor;
 }
 
-Program * ExpressionProgramSemanticAction(CompilerState *compilerState, Expression *expression) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Program *program = calloc(1, sizeof(Program));
-	program->expression = expression;
-	compilerState->abstractSyntaxtTree = program;
-	if (0 < flexCurrentContext()) {
-		logError(_logger, "The final context is not the default (0): %d", flexCurrentContext());
-		compilerState->succeed = false;
-	}
-	else {
-		compilerState->succeed = true;
-	}
-	return program;
-}
-
-Type * SingleTypeSemanticAction(char * singleType) {
+Type *SingleTypeSemanticAction(char *singleType) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Type *type = malloc(sizeof(Type));
 	type->singleType = malloc(sizeof(DataType));
@@ -96,10 +122,10 @@ Type * SingleTypeSemanticAction(char * singleType) {
 	return type;
 }
 
-Type * UnionTypeSemanticAction(char * firstType, ...) {
+Type *UnionTypeSemanticAction(char *firstType, ...) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 
-	Type * type = malloc(sizeof(Type));
+	Type *type = malloc(sizeof(Type));
 	unsigned int i = 0;
 
 	type->unionType = realloc(type->unionType, (i + 1) * sizeof(DataType));
@@ -108,7 +134,7 @@ Type * UnionTypeSemanticAction(char * firstType, ...) {
 	va_list args;
 	va_start(args, firstType);
 
-	char * currentType;
+	char *currentType;
 	while ((currentType = va_arg(args, char *)) != NULL) {
 		type->unionType = realloc(type->unionType, (i + 1) * sizeof(DataType));
 		type->unionType[i] = getDataType(currentType);
@@ -116,58 +142,133 @@ Type * UnionTypeSemanticAction(char * firstType, ...) {
 	return type;
 }
 
-
-DataType getDataType(char * name) {
-	if(name == NULL) {
+DataType getDataType(char *name) {
+	if (name == NULL) {
 		return ANY;
 	}
-    if (strcmp(name, "number") == 0) {
-        return NUMBER;
-    } else if (strcmp(name, "string") == 0) {
-        return STRING;
-    } else if (strcmp(name, "boolean") == 0) {
-        return BOOLEAN;
-    } else if (strcmp(name, "undefined") == 0) {
-        return UNDEFINED;
-    } else if (strcmp(name, "void") == 0) {
-        return VOID;
-    }
+	if (strcmp(name, "number") == 0) {
+		return NUMBER;
+	}
+	else if (strcmp(name, "string") == 0) {
+		return STRING;
+	}
+	else if (strcmp(name, "boolean") == 0) {
+		return BOOLEAN;
+	}
+	else if (strcmp(name, "undefined") == 0) {
+		return UNDEFINED;
+	}
+	else if (strcmp(name, "void") == 0) {
+		return VOID;
+	}
 	return ANY;
 }
 
-VariableType * VariableTypeSemanticAction(char * id, Type * typeName) {
+VariableType *VariableTypeSemanticAction(char *id, Type *typeName) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	VariableType * variableType = malloc(sizeof(VariableType));
+	VariableType *variableType = malloc(sizeof(VariableType));
 	variableType->id = malloc(strlen(id) + 1);
 	strcpy(variableType->id, id);
-	variableType->type = getDataType(typeName);	
+	variableType->type = getDataType(typeName);
 	variableType->type = typeName;
 	return variableType;
 }
 
-
-Type * ReturnTypeSemanticAction(char * type) {
+Type *ReturnTypeSemanticAction(char *type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Type * returnType = malloc(sizeof(Type));
+	Type *returnType = malloc(sizeof(Type));
 	returnType->singleType = getDataType(type);
 	return returnType;
 }
 
-PromiseReturn * PromiseReturnSemanticAction(Type *returnType) {
+PromiseReturn *PromiseReturnSemanticAction(Type *returnType) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	PromiseReturn * promiseReturn = malloc(sizeof(PromiseReturn));
+	PromiseReturn *promiseReturn = malloc(sizeof(PromiseReturn));
 	promiseReturn->type = returnType;
 	return promiseReturn;
 }
 
-Declaration * DeclarationSemanticAction(Token token, VariableType *variableType, Expression *expression) {
+Declaration *DeclarationSemanticAction(DeclarationType type, VariableType *variableType, Expression *expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Declaration *declaration = malloc(sizeof(Declaration));
 	declaration->variable = malloc(sizeof(Variable));
 	declaration->variable->variableType = variableType;
 	declaration->variable->value = expression;
-	declaration->type = token;
+	declaration->type = type;
+	return declaration;
 }
 
+IfStatement *IfSemanticAction(Expression *expression, StatementType *statement, Expression *elseExpression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	IfStatement *ifStatement = malloc(sizeof(IfStatement));
+	ifStatement->condition = expression;
+	ifStatement->thenBody = statement;
+	ifStatement->elseBody = elseExpression;
+	return ifStatement;
+}
 
+ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expression *update, ForLoopType type) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	ParamsFor *paramsFor = malloc(sizeof(ParamsFor));
+	paramsFor->type = type;
+	switch (type) {
+		case FOR_CLASSIC:
+			paramsFor->forClassic.init = init;
+			paramsFor->forClassic.condition = condition;
+			paramsFor->forClassic.update = update;
+			break;
+		case FOR_OF:
+			paramsFor->forOf.value = init;
+			paramsFor->forOf.iterable = condition;
+			break;
+	}
+	return paramsFor;
+}
 
+ForLoop *ForLoopSemanticAction(ParamsFor *params, Code *code) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	ForLoop *forLoop = malloc(sizeof(ForLoop));
+	forLoop->params = params;
+	forLoop->body = code;
+	return forLoop;
+}
+
+WhileLoop *WhileSemanticAction(Expression *condition, Code *code) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	WhileLoop *whileLoop = malloc(sizeof(WhileLoop));
+	whileLoop->condition = condition;
+	whileLoop->body = code;
+	return whileLoop;
+}
+
+Expression *AwaitExpressionSemanticAction(Expression *expression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Expression *newExpression = (Expression *) malloc(sizeof(Expression));
+	newExpression->type = AWAIT_OP;
+	newExpression->expression = expression;
+	return newExpression;
+}
+
+Interface *InterfaceSemanticAction(char *id, VariableTypeList *variables) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Interface *interface = malloc(sizeof(Interface));
+	interface->id = malloc(strlen(id) + 1);
+	strcpy(interface->id, id);
+	interface->variables = variables;
+	return interface;
+}
+
+// Program *ExpressionProgramSemanticAction(CompilerState *compilerState, Expression *expression) {
+// 	_logSyntacticAnalyzerAction(__FUNCTION__);
+// 	Program *program = calloc(1, sizeof(Program));
+// 	program->expression = expression;
+// 	compilerState->abstractSyntaxtTree = program;
+// 	if (0 < flexCurrentContext()) {
+// 		logError(_logger, "The final context is not the default (0): %d", flexCurrentContext());
+// 		compilerState->succeed = false;
+// 	}
+// 	else {
+// 		compilerState->succeed = true;
+// 	}
+// 	return program;
+// }

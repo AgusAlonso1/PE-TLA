@@ -111,10 +111,34 @@ Token AssignmentOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerCont
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
 }
-Token ValueLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+
+Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->value = lexicalAnalyzerContext->lexeme;
-	return VALUE;
+	lexicalAnalyzerContext->semanticValue->valueInt = atoi(lexicalAnalyzerContext->lexeme);
+	return VALUE_INT;
+}
+
+Token NumberLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->valueFloat = atof(lexicalAnalyzerContext->lexeme);
+	return VALUE_FLOAT;
+}
+
+Token BooleanLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	if (strcmp(lexicalAnalyzerContext->lexeme, "true") == 0) {
+		lexicalAnalyzerContext->semanticValue->valueBool = 1; // Boolean true
+	}
+	else if (strcmp(lexicalAnalyzerContext->lexeme, "false") == 0) {
+		lexicalAnalyzerContext->semanticValue->valueBool = 0; // Boolean false
+	}
+	return VALUE_STR;
+}
+
+Token StringLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->valueStr = lexicalAnalyzerContext->lexeme;
+	return VALUE_BOOL;
 }
 
 // Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
@@ -149,21 +173,4 @@ Token KeywordLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token 
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
-}
-
-//error ----
-Token ErrorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext){
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	
-	char *errorStart = strstr(LexicalAnalyzerContext->lexeme, ", ") + 2;
-    char *errorEnd = strstr(errorStart, ")");
-
-    int errorLength = errorEnd - errorStart;
-	char *error;
-    strncpy(error, errorStart, errorLength);
-    error[errorLength] = '\0';
-
-	lexicalAnalyzerContext->error = error;
-
-	return CONSOLE_ERROR;
 }
