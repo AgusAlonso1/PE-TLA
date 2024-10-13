@@ -14,8 +14,8 @@
  * parse anything inside this project instead of using Flex and Bison, I will
  * find you, and I will kill you (Bryan Mills; "Taken", 2008).
  */
-const int main(const int count, const char ** arguments) {
-	Logger * logger = createLogger("EntryPoint");
+const int main(const int count, const char **arguments) {
+	Logger *logger = createLogger("EntryPoint");
 	initializeFlexActionsModule();
 	initializeBisonActionsModule();
 	initializeSyntacticAnalyzerModule();
@@ -32,28 +32,27 @@ const int main(const int count, const char ** arguments) {
 	CompilerState compilerState = {
 		.abstractSyntaxtTree = NULL,
 		.succeed = false,
-		.value = 0
-	};
+		.value = 0};
 	const SyntacticAnalysisStatus syntacticAnalysisStatus = parse(&compilerState);
 	CompilationStatus compilationStatus = SUCCEED;
 	if (syntacticAnalysisStatus == ACCEPT) {
 		// ----------------------------------------------------------------------------------------
 		// Beginning of the Backend... ------------------------------------------------------------
 		logDebugging(logger, "Computing expression value...");
-		Program * program = compilerState.abstractSyntaxtTree;
-		ComputationResult computationResult = computeExpression(program->expression);
-		if (computationResult.succeed) {
-			compilerState.value = computationResult.value;
-			generate(&compilerState);
-		}
-		else {
-			logError(logger, "The computation phase rejects the input program.");
-			compilationStatus = FAILED;
-		}
+		Program *program = compilerState.abstractSyntaxtTree;
+		// ComputationResult computationResult = computeExpression(program->expression);
+		// if (computationResult.succeed) {
+		// 	compilerState.value = computationResult.value;
+		// 	generate(&compilerState);
+		// }
+		// else {
+		// 	logError(logger, "The computation phase rejects the input program.");
+		// 	compilationStatus = FAILED;
+		// }
 		// ...end of the Backend. -----------------------------------------------------------------
 		// ----------------------------------------------------------------------------------------
 		logDebugging(logger, "Releasing AST resources...");
-		releaseProgram(program);
+		// releaseProgram(program);
 	}
 	else {
 		logError(logger, "The syntactic-analysis phase rejects the input program.");

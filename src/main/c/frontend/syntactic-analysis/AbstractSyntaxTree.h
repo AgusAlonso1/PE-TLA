@@ -19,32 +19,41 @@ typedef enum FactorType FactorType;
 typedef enum DeclarationType DeclarationType;
 typedef enum StatementType StatementType;
 typedef enum DataType DataType;
-typedef struct Constant Constant;
 typedef enum IncDecType IncDecType;
 typedef enum IncDecPosition IncDecPosition;
+typedef enum ForLoopType ForLoopType;
+
+typedef union Type Type;
+typedef struct Constant Constant;
 typedef struct IncDec IncDec;
 typedef struct Expression Expression;
 typedef struct Factor Factor;
-typedef union Type Type;
+
 typedef struct Variable Variable;
-typedef struct PromiseReturn PromiseReturn;
-typedef struct Declaration Declaration;
-typedef struct FunctionCall FunctionCall;
-typedef struct ValueList ValueList;
 typedef struct VariableType VariableType;
-typedef enum ForLoopType ForLoopType;
+
+typedef struct Declaration Declaration;
+
+typedef struct ArgumentList ArgumentList;
+typedef struct VariableList VariableList;
+typedef struct VariableTypeList VariableTypeList;
+typedef struct VariableTypeList VariableTypeList;
+
 typedef struct ParamsFor ParamsFor;
 typedef struct ForLoop ForLoop;
 typedef struct IfStatement IfStatement;
 typedef struct WhileLoop WhileLoop;
-typedef struct VariableTypeList VariableTypeList;
-typedef struct VariableList VariableList;
+
 typedef struct Interface Interface;
 typedef struct Enum Enum;
-typedef struct VariableTypeList VariableTypeList;
+
+typedef struct PromiseReturn PromiseReturn;
+
+typedef struct FunctionCall FunctionCall;
 typedef struct FunctionDeclaration FunctionDeclaration;
 typedef struct ArrowFunction ArrowFunction;
 typedef struct AsyncFunction AsyncFunction;
+
 typedef struct Code Code;
 typedef struct Program Program;
 /**
@@ -182,7 +191,7 @@ struct Expression {
 
 struct FunctionCall {
 	char *id;
-	ValueList *arguments;
+	ArgumentList *arguments;
 };
 
 struct VariableTypeList {
@@ -190,9 +199,9 @@ struct VariableTypeList {
 	VariableTypeList *next;
 };
 
-struct ValueList {
+struct ArgumentList {
 	Expression *expression;
-	ValueList *next;
+	ArgumentList *next;
 };
 
 struct VariableTypeList {
@@ -305,21 +314,30 @@ struct Program {
 void releaseExpression(Expression *expression);
 void releaseFactor(Factor *factor);
 void releaseConstant(Constant *constant);
+
 void releaseVariable(Variable *variable);
 void releaseVariableType(VariableType *variableType);
 void releaseVariableName(char *variableName);
-void releaseFunctionCall(FunctionCall *functionCall);
 void releaseVariableTypeList(VariableTypeList *variableTypeList);
-void releaseValueList(ValueList *valueList);
+void releaseVariableList(VariableList *variableList);
+void releaseArgumentList(ArgumentList *argumentList);
+
+void releaseEnum(Enum *enumm);
+void releaseInterface(Interface *interface);
+
+void releaseDeclaration(Declaration *declaration);
+
 void releaseIf(IfStatement *ifStatement);
 void releaseForParams(ParamsFor *params);
 void releaseFor(ForLoop *forLoop);
-void releaseCode(Code *code);
 void releaseWhile(WhileLoop *whileLoop);
+
+void releaseFunctionCall(FunctionCall *functionCall);
 void releaseFunctionDeclaration(FunctionDeclaration *functionDeclaration);
 void releaseArrowFunction(ArrowFunction *arrowFunction);
-void releaseDeclaration(Declaration *declaration);
 void releaseAysncFunction(AsyncFunction *asyncFunction);
+
+void releaseCode(Code *code);
 void releaseProgram(Program *program);
 
 #endif

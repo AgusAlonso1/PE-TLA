@@ -279,7 +279,7 @@ Interface *InterfaceSemanticAction(char *id, VariableTypeList *variables) {
 	return interface;
 }
 
-Enum *EnumSemanticAction(char *id, ValueList *values) {
+Enum *EnumSemanticAction(char *id, ArgumentList *values) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Enum *enumType = malloc(sizeof(Enum));
 	enumType->id = malloc(strlen(id) + 1);
@@ -288,16 +288,16 @@ Enum *EnumSemanticAction(char *id, ValueList *values) {
 	return enumType;
 }
 
-ValueList *ValueListSemanticAction(Expression *expression, ValueList *next) {
+ArgumentList *ArgumentListSemanticAction(Expression *expression, ArgumentList *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	ValueList *valueList = malloc(sizeof(ValueList));
-	valueList->expression = malloc(strlen(expression) + 1);
-	strcpy(valueList->expression, expression);
-	valueList->next = next;
-	return valueList;
+	ArgumentList *argList = malloc(sizeof(ArgumentList));
+	argList->expression = malloc(strlen(expression) + 1);
+	strcpy(argList->expression, expression);
+	argList->next = next;
+	return argList;
 }
 
-FunctionCall *functionCallSemanticAction(char *id, ValueList *arguments) {
+FunctionCall *functionCallSemanticAction(char *id, ArgumentList *arguments) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	FunctionCall *functionCall = malloc(sizeof(FunctionCall));
 	functionCall->id = malloc(strlen(id) + 1);

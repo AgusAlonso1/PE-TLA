@@ -40,12 +40,12 @@ Type *UnionTypeSemanticAction(char *firstType, ...);
 Type *ReturnTypeSemanticAction(char *type);
 
 VariableType *VariableTypeSemanticAction(char *id, Type *typeName);
-ValueList *ValueListSemanticAction(Expression *expression, ValueList *next);
+ArgumentList *ArgumentListSemanticAction(Expression *expression, ArgumentList *next);
 VariableTypeList *VariableTypeListSemanticAction(VariableType *variableType, VariableTypeList *next);
 VariableList *VariableListSemanticAction(Variable *variable, VariableList *next);
 
 Interface *InterfaceSemanticAction(char *id, VariableTypeList *variables);
-Enum *EnumSemanticAction(char *id, ValueList *values);
+Enum *EnumSemanticAction(char *id, ArgumentList *values);
 
 PromiseReturn *PromiseReturnSemanticAction(Type *returnType);
 Declaration *DeclarationSemanticAction(DeclarationType type, VariableType *variableType, Expression *expression);
@@ -54,7 +54,7 @@ ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expressio
 ForLoop *ForLoopSemanticAction(ParamsFor *params, Code *code);
 WhileLoop *WhileSemanticAction(Expression *condition, Code *code);
 
-FunctionCall *functionCallSemanticAction(char *id, ValueList *arguments);
+FunctionCall *functionCallSemanticAction(char *id, ArgumentList *arguments);
 FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableType *arguments, DataType returnType, Code *body);
 ArrowFunction *ArrowFunctionSemanticAction(VariableType *arguments, DataType returnType, Code *body);
 AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, DataType returnType, Code *body);

@@ -15,7 +15,7 @@ void shutdownAbstractSyntaxTreeModule() {
 }
 
 /** PUBLIC FUNCTIONS */
-
+// Expressions -------------------------------------------------------------------------------------------
 void releaseExpression(Expression *expression) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (expression != NULL) {
@@ -34,7 +34,7 @@ void releaseExpression(Expression *expression) {
 		free(expression);
 	}
 }
-
+// Factors -------------------------------------------------------------------------------------------
 void releaseFactor(Factor *factor) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (factor != NULL) {
@@ -55,7 +55,7 @@ void releaseFactor(Factor *factor) {
 		free(factor);
 	}
 }
-
+// Constants -------------------------------------------------------------------------------------------
 void releaseConstant(Constant *constant) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (constant != NULL) {
@@ -67,7 +67,7 @@ void releaseConstant(Constant *constant) {
 		free(constant);
 	}
 }
-
+// Variables -------------------------------------------------------------------------------------------
 void releaseVariable(Variable *variable) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (variable != NULL) {
@@ -90,14 +90,6 @@ void releaseVariableName(char *variableName) {
 	free(variableName);
 }
 
-void releaseFunctionCall(FunctionCall *functionCall) {
-	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (functionCall != NULL) {
-		free(functionCall->id);
-		releaseValueList(functionCall->arguments);
-	}
-}
-
 void releaseVariableTypeList(VariableTypeList *variableTypeList) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (variableTypeList != NULL) {
@@ -107,15 +99,53 @@ void releaseVariableTypeList(VariableTypeList *variableTypeList) {
 	}
 }
 
-void releaseValueList(ValueList *valueList) {
+void releaseVariableList(VariableList *variableList) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (valueList != NULL) {
-		releaseValueList(valueList->next);
+	if (variableList != NULL) {
+		releaseVariableList(variableList->next);
+		releaseVariable(variableList->variable);
+		free(variableList);
 	}
-	releaseExpression(valueList->expression);
-	free(valueList);
 }
 
+void releaseArgumentList(ArgumentList *argumentList) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (argumentList != NULL) {
+		releaseArgumentList(argumentList->next);
+	}
+	releaseExpression(argumentList->expression);
+	free(argumentList);
+}
+
+// Declarations -------------------------------------------------------------------------------------------
+void releaseDeclaration(Declaration *declaration) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (declaration != NULL) {
+		releaseVariable(declaration->variable);
+		free(declaration);
+	}
+}
+
+// Enum and Interfaces -------------------------------------------------------------------------------------------
+void releaseEnum(Enum *enumm) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (enumm != NULL) {
+		free(enumm->id);
+		releaseVariableList(enumm->values);
+		free(enumm);
+	}
+}
+
+void releaseInterface(Interface *interface) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (interface != NULL) {
+		free(interface->id);
+		releaseVariableTypeList(interface->variables);
+		free(interface);
+	}
+}
+
+// Flow control ------------------------------------------------------------------------------------------
 void releaseIf(IfStatement *ifStatement) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (ifStatement != NULL) {
@@ -150,6 +180,52 @@ void releaseFor(ForLoop *forLoop) {
 		releaseForParams(forLoop->params);
 		releaseCode(forLoop->body);
 		free(forLoop);
+	}
+}
+
+void releaseWhile(WhileLoop *whileLoop) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (whileLoop != NULL) {
+		releaseExpression(whileLoop->condition);
+		releaseCode(whileLoop->body);
+		free(whileLoop);
+	}
+}
+
+// Functions -------------------------------------------------------------------------------------------
+void releaseFunctionCall(FunctionCall *functionCall) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (functionCall != NULL) {
+		free(functionCall->id);
+		releaseValueList(functionCall->arguments);
+	}
+}
+
+void releaseFunctionDeclaration(FunctionDeclaration *functionDeclaration) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (functionDeclaration != NULL) {
+		free(functionDeclaration->id);
+		releaseVariableTypeList(functionDeclaration->arguments);
+		releaseCode(functionDeclaration->body);
+		free(functionDeclaration);
+	}
+}
+
+void releaseArrowFunction(ArrowFunction *arrowFunction) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (arrowFunction != NULL) {
+		releaseVariableTypeList(arrowFunction->arguments);
+		releaseCode(arrowFunction->body);
+		free(arrowFunction);
+	}
+}
+
+void releaseAysncFunction(AsyncFunction *asyncFunction) {
+	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+	if (asyncFunction != NULL) {
+		releaseVariableTypeList(asyncFunction->arguments);
+		releaseCode(asyncFunction->body);
+		free(asyncFunction);
 	}
 }
 
@@ -189,51 +265,6 @@ void releaseCode(Code *code) {
 				break;
 		}
 		free(code);
-	}
-}
-
-void releaseWhile(WhileLoop *whileLoop) {
-	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (whileLoop != NULL) {
-		releaseExpression(whileLoop->condition);
-		releaseCode(whileLoop->body);
-		free(whileLoop);
-	}
-}
-
-void releaseFunctionDeclaration(FunctionDeclaration *functionDeclaration) {
-	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (functionDeclaration != NULL) {
-		free(functionDeclaration->id);
-		releaseVariableTypeList(functionDeclaration->arguments);
-		releaseCode(functionDeclaration->body);
-		free(functionDeclaration);
-	}
-}
-
-void releaseArrowFunction(ArrowFunction *arrowFunction) {
-	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (arrowFunction != NULL) {
-		releaseVariableTypeList(arrowFunction->arguments);
-		releaseCode(arrowFunction->body);
-		free(arrowFunction);
-	}
-}
-
-void releaseDeclaration(Declaration *declaration) {
-	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (declaration != NULL) {
-		releaseVariable(declaration->variable);
-		free(declaration);
-	}
-}
-
-void releaseAysncFunction(AsyncFunction *asyncFunction) {
-	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-	if (asyncFunction != NULL) {
-		releaseVariableTypeList(asyncFunction->arguments);
-		releaseCode(asyncFunction->body);
-		free(asyncFunction);
 	}
 }
 
