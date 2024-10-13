@@ -18,11 +18,59 @@ void shutdownBisonActionsModule();
  * Bison semantic actions.
  */
 
-Constant * IntegerConstantSemanticAction(const int value);
-Expression * ArithmeticExpressionSemanticAction(Expression * leftExpression, Expression * rightExpression, ExpressionType type);
-Expression * FactorExpressionSemanticAction(Factor * factor);
-Factor * ConstantFactorSemanticAction(Constant * constant);
-Factor * ExpressionFactorSemanticAction(Expression * expression);
-Program * ExpressionProgramSemanticAction(CompilerState * compilerState, Expression * expression);
+DataType getDataType(char *name);
+
+Constant *IntValueSemanticAction(int value);
+Constant *FloatValueSemanticAction(float value);
+Constant *StringValueSemanticAction(char *value);
+Constant *BooleanValueSemanticAction(char value);
+
+Expression *ExpressionSemanticAction(Expression *leftExpression, Expression *rightExpression, ExpressionType type);
+Expression *FactorExpressionSemanticAction(Factor *factor);
+Expression *AwaitExpressionSemanticAction(Expression *expression);
+
+IncDec *IncDecSemanticAction(Expression *expression, IncDecType type, IncDecPosition position);
+
+Factor *ConstantFactorSemanticAction(Constant *constant);
+Factor *VariableFactorSemanticAction(char *variableName);
+Factor *ExpressionFactorSemanticAction(Expression *expression);
+
+Type *SingleTypeSemanticAction(char *singleType);
+Type *UnionTypeSemanticAction(char *firstType, ...);
+Type *ReturnTypeSemanticAction(char *type);
+
+VariableType *VariableTypeSemanticAction(char *id, Type *typeName);
+ValueList *ValueListSemanticAction(Expression *expression, ValueList *next);
+VariableTypeList *VariableTypeListSemanticAction(VariableType *variableType, VariableTypeList *next);
+VariableList *VariableListSemanticAction(Variable *variable, VariableList *next);
+
+Interface *InterfaceSemanticAction(char *id, VariableTypeList *variables);
+Enum *EnumSemanticAction(char *id, ValueList *values);
+
+PromiseReturn *PromiseReturnSemanticAction(Type *returnType);
+Declaration *DeclarationSemanticAction(DeclarationType type, VariableType *variableType, Expression *expression);
+IfStatement *IfSemanticAction(Expression *expression, StatementType *statement, Expression *elseExpression);
+ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expression *update, ForLoopType type);
+ForLoop *ForLoopSemanticAction(ParamsFor *params, Code *code);
+WhileLoop *WhileSemanticAction(Expression *condition, Code *code);
+
+FunctionCall *functionCallSemanticAction(char *id, ValueList *arguments);
+FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableType *arguments, DataType returnType, Code *body);
+ArrowFunction *ArrowFunctionSemanticAction(VariableType *arguments, DataType returnType, Code *body);
+AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, DataType returnType, Code *body);
+
+Code *IfCodeSemanticAction(IfStatement *ifStatement, Code *next);
+Code *ForCodeSemanticAction(ForLoop *forLoop, Code *next);
+Code *DeclarationCodeSemanticAction(Declaration *declaration, Code *next);
+Code *EnumCodeSemanticAction(Enum *enumm, Code *next);
+Code *InterfaceCodeSemanticAction(Interface *interface, Code *next);
+Code *FunctionCallCodeSemanticAction(FunctionCall *functionCall, Code *next);
+Code *FunctionDeclarationCodeSemanticAction(FunctionDeclaration *functionDeclaration, Code *next);
+Code *ArrowFunctionCodeSemanticAction(ArrowFunction *arrowFunction, Code *next);
+Code *AsyncFunctionCodeSemanticAction(AsyncFunction *asyncFunction, Code *next);
+Code *WhileCodeSemanticAction(WhileLoop *whileLoop, Code *next);
+Code *ExpressionCodeSemanticAction(Expression *expression, Code *next);
+
+Program *CodeProgramSemanticAction(CompilerState *compilerState, Code *code);
 
 #endif

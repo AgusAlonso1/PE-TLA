@@ -37,11 +37,16 @@ typedef struct ParamsFor ParamsFor;
 typedef struct ForLoop ForLoop;
 typedef struct IfStatement IfStatement;
 typedef struct WhileLoop WhileLoop;
+typedef struct VariableTypeList VariableTypeList;
+typedef struct VariableList VariableList;
+typedef struct Interface Interface;
+typedef struct Enum Enum;
+typedef struct VariableTypeList VariableTypeList;
 typedef struct FunctionDeclaration FunctionDeclaration;
+typedef struct ArrowFunction ArrowFunction;
+typedef struct AsyncFunction AsyncFunction;
 typedef struct Code Code;
 typedef struct Program Program;
-typedef struct Interface Interface;
-typedef struct VariableTypeList VariableTypeList; //
 /**
  * Node types for the Abstract Syntax Tree (AST).
  */
@@ -69,6 +74,7 @@ enum ExpressionType {
 enum FactorType {
 	CONSTANT,
 	VARIABLE,
+	EXPRESSION,
 	FUNCTIONCALL
 };
 
@@ -85,7 +91,12 @@ enum StatementType {
 	DECLARATION,
 	EXPRESSION,
 	VARIABLE,
-	FUNCTIONCALL
+	FUNCTIONCALL,
+	FUNCTION_DECLARATION,
+	ARROW_FUNCTION,
+	ASYNC_FUNCTION,
+	ENUM,
+	INTERFACE
 };
 
 enum DataType {
@@ -134,7 +145,8 @@ struct Declaration {
 struct Factor {
 	union {
 		Constant *constant;
-		Variable *variable;
+		char *variableName;
+		Expression *expression; // ( expression )
 		FunctionCall *functionCall;
 	};
 	FactorType type;
@@ -183,6 +195,26 @@ struct ValueList {
 	ValueList *next;
 };
 
+struct VariableTypeList {
+	VariableType *variableType;
+	struct variableTypeList *next;
+};
+
+struct Interface {
+	char *id;
+	VariableTypeList *variables;
+};
+
+struct VariableList {
+	Variable *variable;
+	struct variableList *next;
+};
+
+struct Enum {
+	char *id;
+	VariableList *values;
+};
+
 struct await {
 	Expression *expression;
 };
@@ -226,7 +258,20 @@ struct WhileLoop {
 
 struct FunctionDeclaration {
 	char *id;
-	VariableType *params;
+	VariableType *arguments;
+	DataType returnType;
+	Code *body;
+};
+
+struct ArrowFunction {
+	VariableType *arguments;
+	DataType returnType;
+	Code *body;
+};
+
+struct AsyncFunction {
+	char *id;
+	VariableTypeList *arguments;
 	DataType returnType;
 	Code *body;
 };
@@ -234,33 +279,47 @@ struct FunctionDeclaration {
 struct Code {
 	StatementType statement;
 	union {
-		IfStatement ifStatement;
-		ForLoop forLoop;
-		WhileLoop whileLoop;
-		Declaration declaration;
-		Expression expression;
-		Variable variable;
-		FunctionCall functionCall;
-		FunctionDeclaration FunctionDeclaration;
+		IfStatement *ifStatement;
+		ForLoop *forLoop;
+		WhileLoop *whileLoop;
+		Declaration *declaration;
+		Expression *expression;
+		Variable *variable;
+		FunctionCall *functionCall;
+		FunctionDeclaration *FunctionDeclaration;
+		ArrowFunction *arrowFunction;
+		AsyncFunction *asyncFunction;
+		Enum *enumm;
+		Interface *interface;
 	};
 	struct Code *next;
 };
 
-struct Interface {
-	char *id;
-	variableList *variables;
-};
-
-typedef struct Program {
+struct Program {
 	Code *code;
-} Program;
+};
 
 /**
  * Node recursive destructors.
  */
-void releaseConstant(Constant *constant);
 void releaseExpression(Expression *expression);
-// void releaseFactor(Factor *factor);
+void releaseFactor(Factor *factor);
+void releaseConstant(Constant *constant);
+void releaseVariable(Variable *variable);
+void releaseVariableType(VariableType *variableType);
+void releaseVariableName(char *variableName);
+void releaseFunctionCall(FunctionCall *functionCall);
+void releaseVariableTypeList(VariableTypeList *variableTypeList);
+void releaseValueList(ValueList *valueList);
+void releaseIf(IfStatement *ifStatement);
+void releaseForParams(ParamsFor *params);
+void releaseFor(ForLoop *forLoop);
+void releaseCode(Code *code);
+void releaseWhile(WhileLoop *whileLoop);
+void releaseFunctionDeclaration(FunctionDeclaration *functionDeclaration);
+void releaseArrowFunction(ArrowFunction *arrowFunction);
+void releaseDeclaration(Declaration *declaration);
+void releaseAysncFunction(AsyncFunction *asyncFunction);
 void releaseProgram(Program *program);
 
 #endif

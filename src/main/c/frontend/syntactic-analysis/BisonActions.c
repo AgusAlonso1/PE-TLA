@@ -30,9 +30,6 @@ static void _logSyntacticAnalyzerAction(const char *functionName) {
 }
 
 /* PUBLIC FUNCTIONS */
-
-DataType getDataType(char *name);
-
 Constant *IntValueSemanticAction(int value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Constant *constant = malloc(sizeof(Constant));
@@ -100,15 +97,23 @@ Expression *FactorExpressionSemanticAction(Factor *factor) {
 
 Factor *ConstantFactorSemanticAction(Constant *constant) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Factor *factor = calloc(1, sizeof(Factor));
+	Factor *factor = malloc(sizeof(Factor));
 	factor->constant = constant;
 	factor->type = CONSTANT;
 	return factor;
 }
 
+Factor *VariableFactorSemanticAction(char *variableName) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Factor *factor = malloc(sizeof(Factor));
+	factor->variableName = variableName;
+	factor->type = VARIABLE;
+	return factor;
+}
+
 Factor *ExpressionFactorSemanticAction(Expression *expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Factor *factor = calloc(1, sizeof(Factor));
+	Factor *factor = malloc(sizeof(Factor));
 	factor->expression = expression;
 	factor->type = EXPRESSION;
 	return factor;
@@ -249,6 +254,22 @@ Expression *AwaitExpressionSemanticAction(Expression *expression) {
 	return newExpression;
 }
 
+VariableTypeList *VariableTypeListSemanticAction(VariableType *variableType, VariableTypeList *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	VariableTypeList *variableTypeList = malloc(sizeof(VariableTypeList));
+	variableTypeList->variable = variableType;
+	variableTypeList->next = next;
+	return variableTypeList;
+}
+
+VariableList *VariableListSemanticAction(Variable *variable, VariableList *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	VariableList *variableList = malloc(sizeof(VariableList));
+	variableList->variable = variable;
+	variableList->next = next;
+	return variableList;
+}
+
 Interface *InterfaceSemanticAction(char *id, VariableTypeList *variables) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Interface *interface = malloc(sizeof(Interface));
@@ -258,17 +279,174 @@ Interface *InterfaceSemanticAction(char *id, VariableTypeList *variables) {
 	return interface;
 }
 
-// Program *ExpressionProgramSemanticAction(CompilerState *compilerState, Expression *expression) {
-// 	_logSyntacticAnalyzerAction(__FUNCTION__);
-// 	Program *program = calloc(1, sizeof(Program));
-// 	program->expression = expression;
-// 	compilerState->abstractSyntaxtTree = program;
-// 	if (0 < flexCurrentContext()) {
-// 		logError(_logger, "The final context is not the default (0): %d", flexCurrentContext());
-// 		compilerState->succeed = false;
-// 	}
-// 	else {
-// 		compilerState->succeed = true;
-// 	}
-// 	return program;
-// }
+Enum *EnumSemanticAction(char *id, ValueList *values) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Enum *enumType = malloc(sizeof(Enum));
+	enumType->id = malloc(strlen(id) + 1);
+	strcpy(enumType->id, id);
+	enumType->values = values;
+	return enumType;
+}
+
+ValueList *ValueListSemanticAction(Expression *expression, ValueList *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	ValueList *valueList = malloc(sizeof(ValueList));
+	valueList->expression = malloc(strlen(expression) + 1);
+	strcpy(valueList->expression, expression);
+	valueList->next = next;
+	return valueList;
+}
+
+FunctionCall *functionCallSemanticAction(char *id, ValueList *arguments) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	FunctionCall *functionCall = malloc(sizeof(FunctionCall));
+	functionCall->id = malloc(strlen(id) + 1);
+	strcpy(functionCall->id, id);
+	functionCall->arguments = arguments;
+	return functionCall;
+}
+
+FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableType *arguments, DataType returnType, Code *body) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	FunctionDeclaration *functionDeclaration = malloc(sizeof(FunctionDeclaration));
+	functionDeclaration->id = malloc(strlen(id) + 1);
+	strcpy(functionDeclaration->id, id);
+	functionDeclaration->arguments = arguments;
+	functionDeclaration->returnType = returnType;
+	functionDeclaration->body = body;
+	return functionDeclaration;
+}
+
+ArrowFunction *ArrowFunctionSemanticAction(VariableType *arguments, DataType returnType, Code *body) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	ArrowFunction *arrowFunction = malloc(sizeof(ArrowFunction));
+	arrowFunction->arguments = arguments;
+	arrowFunction->returnType = returnType;
+	arrowFunction->body = body;
+	return arrowFunction;
+}
+
+AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, DataType returnType, Code *body) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	AsyncFunction *asyncFunction = malloc(sizeof(asyncFunction));
+	asyncFunction->id = malloc(strlen(id) + 1);
+	strcpy(asyncFunction->id, id);
+	asyncFunction->arguments = arguments;
+	asyncFunction->returnType = returnType;
+	asyncFunction->body = body;
+	return asyncFunction;
+}
+
+Code *IfCodeSemanticAction(IfStatement *ifStatement, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = IF;
+	code->ifStatement = ifStatement;
+	code->next = next;
+	return code;
+}
+
+Code *ForCodeSemanticAction(ForLoop *forLoop, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = FOR;
+	code->forLoop = forLoop;
+	code->next = next;
+	return code;
+}
+
+Code *DeclarationCodeSemanticAction(Declaration *declaration, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = DECLARATION;
+	code->declaration = declaration;
+	code->next = next;
+	return code;
+}
+
+Code *EnumCodeSemanticAction(Enum *enumm, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = ENUM;
+	code->enumm = enumm;
+	code->next = next;
+	return code;
+}
+
+Code *InterfaceCodeSemanticAction(Interface *interface, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = INTERFACE;
+	code->interface = interface;
+	code->next = next;
+	return code;
+}
+
+Code *FunctionCallCodeSemanticAction(FunctionCall *functionCall, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = FUNCTIONCALL;
+	code->functionCall = functionCall;
+	code->next = next;
+	return code;
+}
+
+Code *FunctionDeclarationCodeSemanticAction(FunctionDeclaration *functionDeclaration, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = FUNCTION_DECLARATION;
+	code->FunctionDeclaration = functionDeclaration;
+	code->next = next;
+	return code;
+}
+
+Code *ArrowFunctionCodeSemanticAction(ArrowFunction *arrowFunction, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = ARROW_FUNCTION;
+	code->arrowFunction = arrowFunction;
+	code->next = next;
+	return code;
+}
+
+Code *AsyncFunctionCodeSemanticAction(AsyncFunction *asyncFunction, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = ASYNC_FUNCTION;
+	code->asyncFunction = asyncFunction;
+	code->next = next;
+	return code;
+}
+
+Code *WhileCodeSemanticAction(WhileLoop *whileLoop, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = WHILE;
+	code->whileLoop = whileLoop;
+	code->next = next;
+	return code;
+}
+
+Code *ExpressionCodeSemanticAction(Expression *expression, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = EXPRESSION;
+	code->expression = expression;
+	code->next = next;
+	return code;
+}
+
+Program *CodeProgramSemanticAction(CompilerState *compilerState, Code *code) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Program *program = calloc(1, sizeof(Program));
+	program->code = code;
+	compilerState->abstractSyntaxtTree = program;
+	if (0 < flexCurrentContext()) {
+		logError(_logger, "The final context is not the default (0): %d", flexCurrentContext());
+		compilerState->succeed = false;
+	}
+	else {
+		compilerState->succeed = true;
+	}
+	return program;
+}

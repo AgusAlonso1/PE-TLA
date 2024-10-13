@@ -24,8 +24,8 @@
 	Type * type;
 	VariableType * variableType;
 	VariableValue * variableValue;
-	AssignmentList * assignmentList;
 	VariableList * variableList;
+	VariableTypeList * variableTypeList;
 	ValueList * valueList;
 	Enum * enum;
 	Interface * interface;
@@ -53,7 +53,7 @@
 	ReturnType * returnType;
 	PromiseReturnType * promiseReturnType;
 
-	Function * function; 
+	functionDeclaration * functionDeclaration; 
 	ArrowFunction * arrowFunction;
 	AsyncFunction * asyncFunction;
 	Await * await;
@@ -150,8 +150,8 @@
 %type <iterableVariable> iterableVariable
 
 %type <valueList> valueList
-%type <assignmentList> assignmentList
 %type <variableList> variableList
+%type <variableTypeList> variableTypeList
 
 
 %type <assign> assign
@@ -176,7 +176,7 @@
 %type <for> for
 %type <while> while
 
-%type <function> function
+%type <functionDeclaration> functionDeclaration
 %type <arrowFunction> arrowFunction
 %type <asyncFunction> asyncFunction
 %type <functionCall> functionCall
@@ -201,21 +201,6 @@
 %%
 
 // IMPORTANT: To use λ in the following grammar, use the %empty symbol.
-
-program: code
-	;
-
-code: if code 																		 													{ $$ = CodeSemanticAction($1, $2); }
-	| for code 																		 													{ $$ = CodeSemanticAction($1, $2); }
-	| declaration code															 	 													{ $$ = CodeSemanticAction($1, $2); }
-	| enum code 																	 													{ $$ = CodeSemanticAction($1, $2); }
-	| interface code															     													{ $$ = CodeSemanticAction($1, $2); }
-	| functionCall code 															 													{ $$ = CodeSemanticAction($1, $2); }
-	| function code 																 													{ $$ = CodeSemanticAction($1, $2); }
-	| arrowFunction code 															 													{ $$ = CodeSemanticAction($1, $2); }
-	| asyncFunction code 															 													{ $$ = CodeSemanticAction($1, $2); }
-	| %empty
-	;
 
 // Expression -----------------------------------------------------------------------------------------------------------------
 arithmeticOperator: ADD         																										{ $$ = ADD_OP; }
@@ -255,7 +240,7 @@ expression: expression[left] arithmeticOperator expression[right]															
 	;
 
 factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS																					{ $$ = ExpressionFactorSemanticAction($2); }
-	| ID 																																{ $$ = VariableFactorSemanticAction($1); }
+	| ID																													    		{ $$ = VariableFactorSemanticAction($1); }
 	| variableValue 																													{ $$ = ValueFactorSemanticAction($1); }
 	| functionCall 																														{ $$ = FunctionFactorSemanticAction($1) }
 	;
@@ -299,19 +284,19 @@ assignOperator: EQUAL 															    													{ $$ = EQUAL_OP; }
 	| DIV_ASSIGN 																														{ $$ = DIV_ASSIGN_OP; }
 	;
 
-assign: assignOperator expression																										{ $$ = AssignOperatorAssignSemanticAction($1, $2); } // creo que solo aplica a number VER 
+assign: assignOperator expression																										{ $$ = AssignOperatorAssignSemanticAction($1, $2); }
 	;
 
-assignmentList: variableType assign																										{ $$ = AssignListSemanticAction($1); }
-	| variableType assign COMA assignmentList  																							{ $$ = MultipleAssignListSemanticAction($1, $3); }
-	| variableType COMA assignmentList																									{ $$ = MultipleAssignListSemanticAction($1, $3); }
+variableList: variableType assign																										{ $$ = AssignListSemanticAction($1); }
+	| variableType assign COMA variableList  																							{ $$ = MultipleAssignListSemanticAction($1, $3); }
+	| variableType COMA variableList																									{ $$ = MultipleAssignListSemanticAction($1, $3); }
 	;
 
-variableList: variableType																												{ $$ = VariableListSemanticAction($1, NULL); }
-	| variableType COMA variableList																									{ $$ = MultipleVariableListSemanticAction($1, $2); }
+variableTypeList: variableType																												{ $$ = VariableTypeListSemanticAction($1, NULL); }
+	| variableType COMA variableTypeList																									{ $$ = VariableTypeListSemanticAction($1, $2); }
 	;
 
-valueList: expression																													{ $$ = ValueListSemanticAction($1); }
+valueList: expression																													{ $$ = ValueListSemanticAction($1, NULL); }
 	| expression COMA valueList																											{ $$ = MultipleValueListSemanticAction($1, $3); }
 	;
 
@@ -325,10 +310,10 @@ iterableVariable: ID  																													{ $$ = IterableVariableSemant
 	;
 
 // Enum and Interface -----------------------------------------------------------------------------------------------------------------
-enum: ENUM ID OPEN_BRACE assignmentList CLOSE_BRACE																						{ $$ = EnumSemanticAction($2, $4); }
+enum: ENUM ID OPEN_BRACE variableList CLOSE_BRACE																						{ $$ = EnumSemanticAction($2, $4); }
 	;
 
-interface: INTERFACE ID OPEN_BRACE variableList CLOSE_BRACE																				{ $$ = InterfaceSemanticAction($2, $4); }
+interface: INTERFACE ID OPEN_BRACE variableTypeList CLOSE_BRACE																				{ $$ = InterfaceSemanticAction($2, $4); }
 	;
 
 // if -----------------------------------------------------------------------------------------------------------------
@@ -356,13 +341,31 @@ await: AWAIT expression 																												{ $$ = AwaitSemanticAction($
 functionCall: ID OPEN_PARENTHESIS valueList CLOSE_PARENTHESIS 																			{ $$ = functionCallSemanticAction($1,$3); }
 	;
 
-function: FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS returnType OPEN_BRACE code CLOSE_BRACE 							{ $$ = FunctionSemanticAction($2,$4,$6,$8)}
+functionDeclaration: FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS returnType OPEN_BRACE code CLOSE_BRACE 				{ $$ = FunctionDeclarationSemanticAction($2,$4,$6,$8)}
 	;
 
 arrowFunction: OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS ARROW COLON returnType OPEN_BRACE code CLOSE_BRACE 						{ $$ = ArrowFunctionSemanticAction($2,$5,$8); }
 	;
 
-asyncFunction: AYSNC FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS COLON promiseReturnType OPEN_BRACE code CLOSE_BRACE 	{ $$ = AsyncFunctionSemanticAction($3,$4,$8,$10); }
+asyncFunction: AYSNC FUNCTION ID OPEN_PARENTHESIS variableTypeList CLOSE_PARENTHESIS COLON promiseReturnType OPEN_BRACE code CLOSE_BRACE 	{ $$ = AsyncFunctionSemanticAction($3,$5,$8,$10); }
+	;
+
+// Code -----------------------------------------------------------------------------------------------------------------
+code: if code 																		 													{ $$ = IfCodeSemanticAction($1, $2); }
+	| for code 																		 													{ $$ = ForCodeSemanticAction($1, $2); }
+	| declaration code															 	 													{ $$ = DeclarationCodeSemanticAction($1, $2); }
+	| enum code 																	 													{ $$ = EnumCodeSemanticAction($1, $2); }
+	| interface code															     													{ $$ = InterfaceCodeSemanticAction($1, $2); }
+	| functionCall code 															 													{ $$ = FunctionaCallCodeSemanticAction($1, $2); }
+	| functionDeclaration code 																 											{ $$ = FunctionDeclarationCodeSemanticAction($1, $2); }
+	| arrowFunction code 															 													{ $$ = ArrowFunctionCodeSemanticAction($1, $2); }
+	| asyncFunction code 															 													{ $$ = AsyncFunctionCodeSemanticAction($1, $2); }
+	| while code 																	 													{ $$ = WhileCodeSemanticAction($1, $2); }
+	| expression code 															 														{ $$ = ExpressionCodeSemanticAction($1, $2); }
+	| %empty																															{ $$ = NULL; }
+	;
+
+program: code 																															{ $$ = CodeProgramSemanticAction(currentCompilerState(),$1); }
 	;
 
 %%
