@@ -51,23 +51,10 @@ void EndMultilineCommentLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerCont
 	}
 }
 
-Token VariableModificatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
-	if (_logIgnoredLexemes) {
-		_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	}
-	lexicalAnalyzerContext->semanticValue->token = lexicalAnalyzerContext->lexeme[FIRST_CHAR_POS]; // l or c => let or const
-	return VARIABLE_MODIFICATOR;
-}
-
 void EndSentenceLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	if (_logIgnoredLexemes) {
 		_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	}
-}
-
-Token DirectAssignmentOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	return DIRECT_ASSIGNMENT;
 }
 
 void IgnoredLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
@@ -82,9 +69,10 @@ Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 }
 
 // ID -----------------------------------------------------------------------------------------------
-void IdentifierLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
+Token IdentifierLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	lexicalAnalyzerContext->semanticValue->id = lexicalAnalyzerContext->lexeme;
+	return ID;
 }
 
 // Operators ----------------------------------------------------------------------------------------
@@ -114,31 +102,31 @@ Token AssignmentOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerCont
 
 Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->valueInt = atoi(lexicalAnalyzerContext->lexeme);
-	return VALUE_INT;
+	lexicalAnalyzerContext->semanticValue->value_int = atoi(lexicalAnalyzerContext->lexeme);
+	return INT_VALUE;
 }
 
 Token NumberLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->valueFloat = atof(lexicalAnalyzerContext->lexeme);
-	return VALUE_FLOAT;
+	lexicalAnalyzerContext->semanticValue->value_float = atof(lexicalAnalyzerContext->lexeme);
+	return FLOAT_VALUE;
 }
 
 Token BooleanLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	if (strcmp(lexicalAnalyzerContext->lexeme, "true") == 0) {
-		lexicalAnalyzerContext->semanticValue->valueBool = 1; // Boolean true
+		lexicalAnalyzerContext->semanticValue->value_bool = 1; // Boolean true
 	}
 	else if (strcmp(lexicalAnalyzerContext->lexeme, "false") == 0) {
-		lexicalAnalyzerContext->semanticValue->valueBool = 0; // Boolean false
+		lexicalAnalyzerContext->semanticValue->value_bool = 0; // Boolean false
 	}
-	return VALUE_STR;
+	return STRING_VALUE;
 }
 
 Token StringLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->valueStr = lexicalAnalyzerContext->lexeme;
-	return VALUE_BOOL;
+	lexicalAnalyzerContext->semanticValue->value_str = lexicalAnalyzerContext->lexeme;
+	return BOOL_VALUE;
 }
 
 // Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
@@ -164,7 +152,8 @@ Token VariableDeclarationLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerCon
 // Types ---------------------------------------------------------------------------------------------
 Token SingleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext) {
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->type = lexicalAnalyzerContext->lexeme;
+	lexicalAnalyzerContext->semanticValue->single_type = malloc(strlen(lexicalAnalyzerContext->lexeme) + 1);
+	stpcpy(lexicalAnalyzerContext->semanticValue->single_type, lexicalAnalyzerContext->lexeme);
 	return SINGLE_TYPE;
 }
 

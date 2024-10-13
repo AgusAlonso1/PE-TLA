@@ -24,16 +24,16 @@ typedef enum IncDecType IncDecType;
 typedef enum IncDecPosition IncDecPosition;
 typedef enum ForLoopType ForLoopType;
 typedef enum IterableType IterableType;
+typedef enum UserType UserType;
 
 typedef union Type Type;
+typedef struct TypeDeclaration TypeDeclaration;
 typedef struct IterableVariable IterableVariable;
 
 typedef struct Constant Constant;
-typedef struct Array Array;
 typedef struct ArrayContent ArrayContent;
 
 typedef struct ObjectContent ObjectContent;
-typedef struct Object Object;
 
 typedef struct IncDec IncDec;
 typedef struct Expression Expression;
@@ -121,8 +121,7 @@ enum StatementType {
 	FUNCTION_DECLARATION_ST,
 	ARROW_FUNCTION_ST,
 	ASYNC_FUNCTION_ST,
-	ENUM_ST,
-	INTERFACE_ST
+	TYPE_DECLARATION_ST
 };
 
 enum DataType {
@@ -131,22 +130,35 @@ enum DataType {
 	BOOLEAN,
 	ANY,
 	UNDEFINED,
-	VOID
-};
-
-enum ObjectType {
+	VOID,
+	NEVER,
+	UNKNOWN,
 	NBR_ARRAY,
 	STR_ARRAY,
 	BOOL_ARRAY,
 	ANY_ARRAY,
-	UNDEFINED_ARRAY,
-	OBJECT
+	VOID_ARRAY,
+	UNDEF_ARRAY,
+	NEVER_ARRAY,
+	UNK_ARRAY, // unknown array
 };
 
-enum specialType {
-	ANY,
-	UNKOWN,
-	NEVER
+enum UserType {
+	TYPE_OBJECT,
+	TYPE_EXPRESSION,
+	TYPE_ARRAY,
+	TYPE_INTERFACE,
+	TYPE_ENUM
+};
+
+enum IncDecType {
+	INC_OP,
+	DEC_OP
+};
+
+enum IncDecPosition {
+	PREFIX,
+	POSTFIX
 };
 
 union Type {
@@ -171,7 +183,12 @@ struct VariableType {
 
 struct Variable {
 	VariableType *variableType;
-	Expression *value;
+	union {
+		Expression *expression;
+		ArrayContent *arrayContent;
+		ObjectContent *objectContent;
+	};
+	UserType type;
 };
 
 struct PromiseReturnType {
@@ -183,6 +200,18 @@ struct Declaration {
 	Variable *variable;
 };
 
+struct TypeDeclaration {
+	UserType type;
+	char *id;
+	union {
+		ObjectContent *objectContent;
+		Expression *expression;
+		ArrayContent *arrayContent;
+		VariableTypeList *interface;
+		VariableList *enumm;
+	};
+};
+
 struct Factor {
 	union {
 		Constant *constant;
@@ -191,16 +220,6 @@ struct Factor {
 		FunctionCall *functionCall;
 	};
 	FactorType type;
-};
-
-enum IncDecType {
-	INC_OP,
-	DEC_OP
-};
-
-enum IncDecPosition {
-	PREFIX,
-	POSTFIX
 };
 
 struct IncDec {
@@ -236,19 +255,9 @@ struct VariableTypeList {
 	struct variableTypeList *next;
 };
 
-struct Interface {
-	char *id;
-	VariableTypeList *variables;
-};
-
 struct VariableList {
 	Variable *variable;
 	struct variableList *next;
-};
-
-struct Enum {
-	char *id;
-	VariableList *values;
 };
 
 struct await {
@@ -260,29 +269,21 @@ struct ArrayContent {
 	ArrayContent *next;
 };
 
-struct Array {
-	ArrayContent *arrayContent;
-	char *id;
-};
-
 struct ObjectContent {
 	char *key;
 	Expression *value;
 	ObjectContent *next;
 };
 
-struct Object {
-	char *id;
-	VariableList *variables;
-};
-
-struct IterableVariable {
-	union {
-		Array *array;
-		Object *object;
-	};
-	IterableType type;
-};
+// struct IterableVariable {
+// 	union {
+// 		ArrayContent *arrayContent;
+//      ObjectContent *objectContent;
+//      char *variableName;
+//      FunctionCall *functionCall;
+// 	};
+// 	IterableType type;
+// };
 
 enum ForLoopType {
 	FOR_CLASSIC,
@@ -354,8 +355,7 @@ struct Code {
 		FunctionDeclaration *FunctionDeclaration;
 		ArrowFunction *arrowFunction;
 		AsyncFunction *asyncFunction;
-		Enum *enumm;
-		Interface *interface;
+		TypeDeclaration *typeDeclaration;
 	};
 	struct Code *next;
 };
@@ -367,33 +367,33 @@ struct Program {
 /**
  * Node recursive destructors.
  */
-void releaseExpression(Expression *expression);
-void releaseFactor(Factor *factor);
-void releaseConstant(Constant *constant);
+// void releaseExpression(Expression *expression);
+// void releaseFactor(Factor *factor);
+// void releaseConstant(Constant *constant);
 
-void releaseVariable(Variable *variable);
-void releaseVariableType(VariableType *variableType);
-void releaseVariableName(char *variableName);
-void releaseVariableTypeList(VariableTypeList *variableTypeList);
-void releaseVariableList(VariableList *variableList);
-void releaseArgumentList(ArgumentList *argumentList);
+// void releaseVariable(Variable *variable);
+// void releaseVariableType(VariableType *variableType);
+// void releaseVariableName(char *variableName);
+// void releaseVariableTypeList(VariableTypeList *variableTypeList);
+// void releaseVariableList(VariableList *variableList);
+// void releaseArgumentList(ArgumentList *argumentList);
 
-void releaseEnum(Enum *enumm);
-void releaseInterface(Interface *interface);
+// void releaseEnum(Enum *enumm);
+// void releaseInterface(Interface *interface);
 
-void releaseDeclaration(Declaration *declaration);
+// void releaseDeclaration(Declaration *declaration);
 
-void releaseIf(IfStatement *ifStatement);
-void releaseForParams(ParamsFor *params);
-void releaseFor(ForLoop *forLoop);
-void releaseWhile(WhileLoop *whileLoop);
+// void releaseIf(IfStatement *ifStatement);
+// void releaseForParams(ParamsFor *params);
+// void releaseFor(ForLoop *forLoop);
+// void releaseWhile(WhileLoop *whileLoop);
 
-void releaseFunctionCall(FunctionCall *functionCall);
-void releaseFunctionDeclaration(FunctionDeclaration *functionDeclaration);
-void releaseArrowFunction(ArrowFunction *arrowFunction);
-void releaseAysncFunction(AsyncFunction *asyncFunction);
+// void releaseFunctionCall(FunctionCall *functionCall);
+// void releaseFunctionDeclaration(FunctionDeclaration *functionDeclaration);
+// void releaseArrowFunction(ArrowFunction *arrowFunction);
+// void releaseAysncFunction(AsyncFunction *asyncFunction);
 
-void releaseCode(Code *code);
-void releaseProgram(Program *program);
+// void releaseCode(Code *code);
+// void releaseProgram(Program *program);
 
 #endif
