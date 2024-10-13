@@ -23,7 +23,12 @@
 
 	Type * type;
 	VariableType * variableType;
-	VariableValue * variableValue;
+	Constant * constant;
+	ArrayContent * arrayContent;
+	Array * array;
+	ObjectContent * objectContent;
+	Object * object;
+
 	VariableList * variableList;
 	VariableTypeList * variableTypeList;
 	ArgumentList * argumentList;
@@ -31,28 +36,23 @@
 	Interface * interface;
 
 	AssignOperator * assignOperator;
-	Assign * assign;
+	Variable * variable;
 
 	Expression * expression;
-	AritmeticOperator * arithmeticOperator;
-	LogicalOperator * logicalOperator;
-	ComparisonOperator * comparisonOperator;
+	ExpressionType * expressionType;
 	IncDecType * incDecType;
 	IncDec * incDec;
 	Factor * factor;
 
 	IterableVariable * iterableVariable;
 	ParamsFor * paramsFor;
-	For * forLoop;
-	If *ifStatement;
-	While * whileLoop;
-	TryCatch * tryCatch;
-	Statement * statement;
+	ForLoop * forLoop;
+	IfStatement *ifStatement;
+	WhileLoop * whileLoop;
 
-	ReturnType * returnType;
 	PromiseReturnType * promiseReturnType;
 
-	functionDeclaration * functionDeclaration; 
+	FunctionDeclaration * functionDeclaration; 
 	ArrowFunction * arrowFunction;
 	AsyncFunction * asyncFunction;
 	Await * await;
@@ -112,6 +112,7 @@
 %token <token> VAR
 
 %token <single_type> SINGLE_TYPE
+%token <token> TYPE
 
 %token <id> ID 
 %token <token> COLON
@@ -128,6 +129,9 @@
 %token <token> CLOSE_BRACE
 %token <token> OPEN_PARENTHESIS
 %token <token> CLOSE_PARENTHESIS
+%token <token> OPEN_BRACKET
+%token <token> CLOSE_BRACKET
+%token <token> DOT
 
 %token <token> INCREMENT
 %token <token> DECREMENT
@@ -165,29 +169,28 @@
 %type <type> type
 
 %type <variableType> variableType
-%type <variableValue> variableValue
-%type <iterableVariable> iterableVariable
+%type <constant> constant
+%type <arrayContent> arrayContent
+%type <array> array
+%type <objectContent> objectContent
+%type <object> object
 
 %type <argumentList> argumentList
 %type <variableList> variableList
 %type <variableTypeList> variableTypeList
 
 
-%type <assign> assign
+%type <variable> variable
 %type <assignOperator> assignOperator
 
 %type <enumm> enumm
 %type <interface> interface
 
-%type <arithmeticOperator> arithmeticOperator
-%type <logicalOperator> logicalOperator
-%type <comparisonOperator> comparisonOperator
+%type <expressionType> expressionType
 %type <incDecType> incDecType
 %type <incDec> incDec
 %type <expression> expression
 
-
-%type <returnType> returnType
 %type <promiseReturnType> promiseReturnType
 %type <await> await
 
@@ -207,8 +210,6 @@
 %type <program> program
 %type <code> code
 
-
-
 /**
  * Precedence and associativity.
  *
@@ -222,68 +223,78 @@
 // IMPORTANT: To use λ in the following grammar, use the %empty symbol.
 
 // Expression -----------------------------------------------------------------------------------------------------------------
-arithmeticOperator: ADD         																											{ $$ = ADD_OP; }
-	| SUB      																																{ $$ = SUB_OP; }
-	| MUL 																																	{ $$ = MUL_OP; }
-	| DIV 																																	{ $$ = DIV_OP; }
+expressionType: ADD         																											{ $$ = ADD_OP; }
+	| SUB      																															{ $$ = SUB_OP; }
+	| MUL 																																{ $$ = MUL_OP; }
+	| DIV 																																{ $$ = DIV_OP; }
+	| GREATER       																													{ $$ = GREATER_OP; }
+    | LESS         																														{ $$ = LESS_OP; }
+    | NEQUAL       																														{ $$ = NEQUAL_OP; }
+    | STRICT_EQUAL																														{ $$ = STRICT_EQUAL_OP; }
+    | STRICT_NEQUAL 																													{ $$ = STRICT_NEQUAL_OP; }
+    | LESS_EQUAL   																														{ $$ = LESS_EQUAL_OP; }
+    | GREATER_EQUAL 																													{ $$ = GREATER_EQUAL_OP; }
+    | OR 																																{ $$ = OR_OP; }
+	| AND 																																{ $$ = AND_OP; }
 	;
 
-comparisonOperator: GREATER       																											{ $$ = GREATER_OP; }
-    | LESS         																															{ $$ = LESS_OP; }
-    | NEQUAL       																															{ $$ = NEQUAL_OP; }
-    | STRICT_EQUAL																															{ $$ = STRICT_EQUAL_OP; }
-    | STRICT_NEQUAL 																														{ $$ = STRICT_NEQUAL_OP; }
-    | LESS_EQUAL   																															{ $$ = LESS_EQUAL_OP; }
-    | GREATER_EQUAL 																														{ $$ = GREATER_EQUAL_OP; }
-    ;
-
-logicalOperator: OR 																														{ $$ = OR_OP; }
-	| AND 																																	{ $$ = AND_OP; }
+incDecType: INCREMENT 																													{ $$ = INC_OP; }
+	| DECREMENT 																														{ $$ = DEC_OP; }																			
 	;
 
-incDecType: INCREMENT 																														{ $$ = INC_OP; }
-	| DECREMENT 																															{ $$ = DEC_OP; }																			
+incDec: ID incDecType 																													{ $$ = 	IncDecSemanticAction($1,$2, POSFIX); }
+	| OPEN_PARENTHESIS incDec CLOSE_PARENTHESIS incDecType																				{ $$ = 	IncDecSemanticAction($1,$3, POSFIX); }
+	| incDecType ID 																													{ $$ =  IncDecSemanticAction($2,$1, PREFIX); }
+	| incDecType OPEN_PARENTHESIS incDec CLOSE_PARENTHESIS																				{ $$ =  IncDecSemanticAction($3,$1, PREFIX); }
 	;
 
-incDec: ID incDecType 																														{ $$ = 	IncDecSemanticAction($1,$op, POSFIX); }
-	| OPEN_PARENTHESIS incDec CLOSE_PARENTHESIS incDecType[op]																				{ $$ = 	IncDecSemanticAction($1,$op, POSFIX); }
-	| incDecType[op] ID 																													{ $$ =  IncDecSemanticAction($1,$op, PREFIX); }
-	| incDecType[op] OPEN_PARENTHESIS incDec CLOSE_PARENTHESIS																				{ $$ =  IncDecSemanticAction($1,$op, PREFIX); }
+expression: expression[left] expressionType[op] expression[right]																		{ $$ = ExpressionSemanticAction($left, $right, $op); }
+	| NOT expression 																													{ $$ = ExpressionSemanticAction($2, NULL, NOT_OP);}
+	| factor																															{ $$ = FactorExpressionSemanticAction($1); }
 	;
 
-expression: expression[left] arithmeticOperator[op] expression[right]																		{ $$ = ExpressionSemanticAction($left, $right, $op); }
-	| expression[left] logicalOperator[op] expression[right]																				{ $$ = ExpressionSemanticAction($left, $right, $op); }
-	| expression[left] comparisonOperator[op] expression[right]																				{ $$ = ExpressionSemanticAction($left, $right, $op); }
-	| NOT expression 																														{ $$ = ExpressionSemanticAction($2, NULL, NOT_OP);}
-	| factor																																{ $$ = FactorExpressionSemanticAction($1); }
-	;
-
-factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS																						{ $$ = ExpressionFactorSemanticAction($2); }
-	| ID																													    			{ $$ = VariableFactorSemanticAction($1); }
-	| variableValue 																														{ $$ = ValueFactorSemanticAction($1); }
-	| functionCall 																															{ $$ = FunctionFactorSemanticAction($1) }
+factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS																					{ $$ = ExpressionFactorSemanticAction($2); }
+	| ID																													    		{ $$ = VariableFactorSemanticAction($1); }
+	| constant 																															{ $$ = ValueFactorSemanticAction($1); }
+	| functionCall 																														{ $$ = FunctionFactorSemanticAction($1) }
 	;
 
 // Type -------------------------------------------------------------------------------------------------------------------------------------------------
 type: SINGLE_TYPE																    														{ $$ = SingleTypeSemanticAction($1); }
 	| SINGLE_TYPE PIPE type																													{ $$ = UnionTypeSemanticAction($1, $3); }
+	| type OPEN_BRACKET CLOSE_BRACKET 																										{ $$ = ArrayTypeSemanticAction($1); }
 	;
 
 variableType: ID COLON type																													{ $$ = VariableTypeSemanticAction($1, $3); }
 	| ID																																	{ $$ = VariableTypeSemanticAction($1, NULL); } // CHECK
 	;
 
-variableValue: INT_VALUE																													{ $$ = IntValueSemanticAction($1); }
-	| FLOAT_VALUE																															{ $$ = FloatValueSemanticAction($1); }
-	| STRING_VALUE																															{ $$ = StringValueSemanticAction($1); }
-	| BOOL_VALUE																															{ $$ = BoolValueSemanticAction($1); }
+constant: INT_VALUE																															{ $$ = IntConstantSemanticAction($1); }
+	| FLOAT_VALUE																															{ $$ = FloatConstantSemanticAction($1); }
+	| STRING_VALUE																															{ $$ = StringConstantSemanticAction($1); }
+	| BOOL_VALUE																															{ $$ = BoolConstantSemanticAction($1); }
 	;
 
-returnType: COLON type																														{ $$ = ReturnTypeSemanticAction($2); }
-	| %empty 																																{ $$ = ReturnTypeSemanticAction(NULL); } //check
+array: OPEN_BRACKET arrayContent CLOSE_BRACKET																								{$$ = ArraySemanticAction($2); }
+	;
+	
+arrayContent: expression COLON arrayContent 																								{ $$ = ArrayContentSemanticAction($1, $3); }
+	| expression 																															{ $$ = ArrayContentSemanticAction($1, NULL); }
+	| %empty	
 	;
 
-promiseReturnType: PROMISE GREATER returnType LESS																							{ $$ = PromiseReturnTypeSemanticAction($2); }
+object: OPEN_BRACE objectContent CLOSE_BRACE 																								{ $$ = ObjectSemanticAction($2); }
+	;
+
+objectContent: ID COLON expression 																											{ $$ = ObjectContentSemanticAction($1, $3); }
+	| ID COLON expression COMA objectContent 																								{ $$ = ObjectContentSemanticAction($1, $3, $5); }
+	;
+
+inicializeObject: ID COLON expression 																										{ $$ = InicializeObjectSemanticAction($1, $3); }
+	| ID COLON expression COMA inicializeObject 																							{ $$ = InicializeObjectSemanticAction($1, $3, $5); }
+	;
+
+promiseReturnType: PROMISE GREATER type LESS																								{ $$ = PromiseReturnTypeSemanticAction($2); }
 	| %empty																																{ $$ = PromiseReturnTypeSemanticAction(NULL); }
 	;
 
@@ -295,20 +306,24 @@ declaration: LET variableType EQUAL expression																								{ $$ = Dec
 	| VAR variableType																														{ $$ = DeclarationSemanticAction(VAR_DT, $2, NULL); }
 //	| declaration COMA variableType													{ } // VER
 	;
+	
+typeDeclaration: TYPE ID EQUAL object																										{ $$ = ObjectTypeDeclarationSemanticAction($2, $4); }																								{ $$ = TypeDeclarationSemanticAction($2, $4); }
+	| TYPE ID EQUAL expression																												{ $$ = AnyTypeDeclarationSemanticAction($2, $4); }
+	;																																		{ $$ = DeclarationObjectSemanticAction($2, $4); }
 
-assignOperator: EQUAL 															    														{ $$ = EQUAL_OP; }
-	| ADD_ASSIGN 																															{ $$ = ADD_ASSIGN_OP; }
-	| SUB_ASSIGN 																															{ $$ = SUB_ASSIGN_OP; } 
-	| MUL_ASSIGN 																															{ $$ = MUL_ASSIGN_OP; }
-	| DIV_ASSIGN 																															{ $$ = DIV_ASSIGN_OP; }
+assignOperator: EQUAL 															    														{ $$ = ASSIGNMENT; }
+	| ADD_ASSIGN 																															{ $$ = ASSIGNMENT_ADD; }
+	| SUB_ASSIGN 																															{ $$ = ASSIGNMENT_SUB; } 
+	| MUL_ASSIGN 																															{ $$ = ASSIGNMENT_MUL; }
+	| DIV_ASSIGN 																															{ $$ = ASSIGNMENT_DIV; }
 	;
 
-assign: assignOperator expression																											{ $$ = AssignOperatorAssignSemanticAction($1, $2); }
+variable: variableType assignOperator[op] expression																						{ $$ = AssignOperatorAssignSemanticAction($1, $2, $3); }
 	;
 
-variableList: variableType assign																											{ $$ = AssignListSemanticAction($1); }
-	| variableType assign COMA variableList  																								{ $$ = MultipleAssignListSemanticAction($1, $3); }
-	| variableType COMA variableList																										{ $$ = MultipleAssignListSemanticAction($1, $3); }
+variableList: variable																														{ $$ = VariableSemanticAction($1); }
+	| variable COMA variableList  																											{ $$ = MultipleAssignListSemanticAction($1, $3); }
+	| variable COMA variableList																											{ $$ = MultipleAssignListSemanticAction($1, $3); }
 	;
 
 variableTypeList: variableType																												{ $$ = VariableTypeListSemanticAction($1, NULL); }
@@ -319,9 +334,9 @@ argumentList: expression																													{ $$ = ArgumentListSemantic
 	| expression COMA argumentList																											{ $$ = ArgumentListSemanticAction($1, $3); }
 	;
 
-iterableVariable: ID  																														{ $$ = IterableVariableSemanticAction($1); }
+/* iterableVariable: ID  																														{ $$ = IterableVariableSemanticAction($1); }
 	| functionCall 																															{ $$ = IterableVariableSemanticAction($1); }
-	;
+	; */
 
 // enum and Interface -----------------------------------------------------------------------------------------------------------------
 enumm: ENUM ID OPEN_BRACE argumentList CLOSE_BRACE																							{ $$ = EnumSemanticAction($2, $4); }
@@ -336,8 +351,8 @@ ifStatement: IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CL
 	;
 
 //for -----------------------------------------------------------------------------------------------------------------
-paramsFor: OPEN_PARENTHESIS declaration SEMI_COLON expression SEMI_COLON assign CLOSE_PARENTHESIS 											{ $$ = ParamsForSemanticAction($2, $4, $6, FOR_CLASSIC); }
-	| OPEN_PARENTHESIS declaration OF iterableVariable CLOSE_PARENTHESIS 																	{ $$ = ParamsForSemanticAction($2, $5, NULL, FOR_OF); }
+paramsFor: OPEN_PARENTHESIS declaration SEMI_COLON expression SEMI_COLON expression CLOSE_PARENTHESIS 											{ $$ = ParamsForSemanticAction($2, $4, $6, FOR_CLASSIC); }
+	//| OPEN_PARENTHESIS declaration OF iterableVariable CLOSE_PARENTHESIS 																	{ $$ = ParamsForSemanticAction($2, $5, NULL, FOR_OF); }
 	;
 
 forLoop: FOR paramsFor OPEN_BRACE code CLOSE_BRACE 																							{ $$ = ForSemanticAction($2, $4); }
@@ -355,10 +370,10 @@ await: AWAIT expression 																													{ $$ = AwaitSemanticAction(
 functionCall: ID OPEN_PARENTHESIS argumentList CLOSE_PARENTHESIS 																			{ $$ = functionCallSemanticAction($1,$3); }
 	;
 
-functionDeclaration: FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS returnType OPEN_BRACE code CLOSE_BRACE 					{ $$ = FunctionDeclarationSemanticAction($2,$4,$6,$8)}
+functionDeclaration: FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS COLON type OPEN_BRACE code CLOSE_BRACE 					{ $$ = FunctionDeclarationSemanticAction($2,$4,$7,$8)}
 	;
 
-arrowFunction: OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS ARROW COLON returnType OPEN_BRACE code CLOSE_BRACE 							{ $$ = ArrowFunctionSemanticAction($2,$5,$8); }
+arrowFunction: OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS ARROW COLON type OPEN_BRACE code CLOSE_BRACE 							{ $$ = ArrowFunctionSemanticAction($2,$6,$8); }
 	;
 
 asyncFunction: AYSNC FUNCTION ID OPEN_PARENTHESIS variableTypeList CLOSE_PARENTHESIS COLON promiseReturnType OPEN_BRACE code CLOSE_BRACE 	{ $$ = AsyncFunctionSemanticAction($3,$5,$8,$10); }
@@ -376,6 +391,7 @@ code: ifStatement code 																		 												{ $$ = IfCodeSemanticActio
 	| arrowFunction code 															 														{ $$ = ArrowFunctionCodeSemanticAction($1, $2); }
 	| asyncFunction code 															 														{ $$ = AsyncFunctionCodeSemanticAction($1, $2); }
 	| expression code 															 															{ $$ = ExpressionCodeSemanticAction($1, $2); }
+	| incDec code 																															{ $$ = IncDecCodeSemanticAction($1, $2); }
 	| %empty																																{ $$ = NULL; }
 	;
 

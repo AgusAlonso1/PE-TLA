@@ -52,9 +52,9 @@ endif ()
 
 # Defines the entry-point of the application, and the source-codes (*.c extension).
 # The header files (*.h extension), are automatically included from the source-codes.
+# src/main/c/backend/code-generation/Generator.c
+# src/main/c/backend/domain-specific/Calculator.c
 add_executable(Compiler
-	src/main/c/backend/code-generation/Generator.c
-	src/main/c/backend/domain-specific/Calculator.c
 	src/main/c/EntryPoint.c
 	src/main/c/frontend/lexical-analysis/FlexActions.c
 	src/main/c/frontend/lexical-analysis/FlexScanner.c

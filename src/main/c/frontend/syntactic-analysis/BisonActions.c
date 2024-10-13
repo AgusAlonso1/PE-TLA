@@ -30,36 +30,36 @@ static void _logSyntacticAnalyzerAction(const char *functionName) {
 }
 
 /* PUBLIC FUNCTIONS */
-Constant *IntValueSemanticAction(int value) {
+Constant *IntConstantSemanticAction(int value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Constant *constant = malloc(sizeof(Constant));
-	constant->type = NUMBER;
 	constant->integer = value;
-	return constant;
-}
-
-Constant *FloatValueSemanticAction(float value) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Constant *constant = malloc(sizeof(Constant));
 	constant->type = NUMBER;
-	constant->floating = value;
 	return constant;
 }
 
-Constant *StringValueSemanticAction(char *value) {
+Constant *FloatConstantSemanticAction(float value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Constant *constant = malloc(sizeof(Constant));
-	constant->type = STRING;
+	constant->floating = value;
+	constant->type = NUMBER;
+	return constant;
+}
+
+Constant *StringConstantSemanticAction(char *value) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Constant *constant = malloc(sizeof(Constant));
 	constant->string = malloc(strlen(value) + 1);
 	strcpy(constant->string, value);
+	constant->type = STRING;
 	return constant;
 }
 
-Constant *BooleanValueSemanticAction(char value) {
+Constant *BooleanConstantSemanticAction(char value) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Constant *constant = malloc(sizeof(Constant));
-	constant->type = BOOLEAN;
 	constant->boolean = value;
+	constant->type = BOOLEAN;
 	return constant;
 }
 
@@ -147,6 +147,13 @@ Type *UnionTypeSemanticAction(char *firstType, ...) {
 	return type;
 }
 
+Type *ArrayTypeSemanticAction(char *id) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Type *type = malloc(sizeof(Type));
+	// terminar
+	return type;
+}
+
 DataType getDataType(char *name) {
 	if (name == NULL) {
 		return ANY;
@@ -179,16 +186,9 @@ VariableType *VariableTypeSemanticAction(char *id, Type *typeName) {
 	return variableType;
 }
 
-Type *ReturnTypeSemanticAction(char *type) {
+PromiseReturnType *PromiseReturnTypeSemanticAction(Type *returnType) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Type *returnType = malloc(sizeof(Type));
-	returnType->singleType = getDataType(type);
-	return returnType;
-}
-
-PromiseReturn *PromiseReturnSemanticAction(Type *returnType) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	PromiseReturn *promiseReturn = malloc(sizeof(PromiseReturn));
+	PromiseReturnType *promiseReturn = malloc(sizeof(PromiseReturnType));
 	promiseReturn->type = returnType;
 	return promiseReturn;
 }
@@ -211,8 +211,8 @@ IfStatement *IfSemanticAction(Expression *expression, StatementType *statement, 
 	ifStatement->elseBody = elseExpression;
 	return ifStatement;
 }
-
-ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expression *update, ForLoopType type) {
+// VER
+ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expression *update, VariableList *iterable, ForLoopType type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ParamsFor *paramsFor = malloc(sizeof(ParamsFor));
 	paramsFor->type = type;
@@ -224,7 +224,7 @@ ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expressio
 			break;
 		case FOR_OF:
 			paramsFor->forOf.value = init;
-			paramsFor->forOf.iterable = condition;
+			paramsFor->forOf.iterable = iterable;
 			break;
 	}
 	return paramsFor;
@@ -257,7 +257,7 @@ Expression *AwaitExpressionSemanticAction(Expression *expression) {
 VariableTypeList *VariableTypeListSemanticAction(VariableType *variableType, VariableTypeList *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	VariableTypeList *variableTypeList = malloc(sizeof(VariableTypeList));
-	variableTypeList->variable = variableType;
+	variableTypeList->variableType = variableType;
 	variableTypeList->next = next;
 	return variableTypeList;
 }
@@ -306,7 +306,7 @@ FunctionCall *functionCallSemanticAction(char *id, ArgumentList *arguments) {
 	return functionCall;
 }
 
-FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableType *arguments, DataType returnType, Code *body) {
+FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableType *arguments, Type *returnType, Code *body) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	FunctionDeclaration *functionDeclaration = malloc(sizeof(FunctionDeclaration));
 	functionDeclaration->id = malloc(strlen(id) + 1);
@@ -317,7 +317,7 @@ FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableType *a
 	return functionDeclaration;
 }
 
-ArrowFunction *ArrowFunctionSemanticAction(VariableType *arguments, DataType returnType, Code *body) {
+ArrowFunction *ArrowFunctionSemanticAction(VariableType *arguments, Type *returnType, Code *body) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	ArrowFunction *arrowFunction = malloc(sizeof(ArrowFunction));
 	arrowFunction->arguments = arguments;
@@ -326,7 +326,7 @@ ArrowFunction *ArrowFunctionSemanticAction(VariableType *arguments, DataType ret
 	return arrowFunction;
 }
 
-AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, DataType returnType, Code *body) {
+AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, Type *returnType, Code *body) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	AsyncFunction *asyncFunction = malloc(sizeof(asyncFunction));
 	asyncFunction->id = malloc(strlen(id) + 1);
@@ -340,7 +340,7 @@ AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments
 Code *IfCodeSemanticAction(IfStatement *ifStatement, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = IF;
+	code->statement = IF_ST;
 	code->ifStatement = ifStatement;
 	code->next = next;
 	return code;
@@ -349,7 +349,7 @@ Code *IfCodeSemanticAction(IfStatement *ifStatement, Code *next) {
 Code *ForCodeSemanticAction(ForLoop *forLoop, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = FOR;
+	code->statement = FOR_ST;
 	code->forLoop = forLoop;
 	code->next = next;
 	return code;
@@ -358,7 +358,7 @@ Code *ForCodeSemanticAction(ForLoop *forLoop, Code *next) {
 Code *DeclarationCodeSemanticAction(Declaration *declaration, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = DECLARATION;
+	code->statement = DECLARATION_ST;
 	code->declaration = declaration;
 	code->next = next;
 	return code;
@@ -367,7 +367,7 @@ Code *DeclarationCodeSemanticAction(Declaration *declaration, Code *next) {
 Code *EnumCodeSemanticAction(Enum *enumm, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = ENUM;
+	code->statement = ENUM_ST;
 	code->enumm = enumm;
 	code->next = next;
 	return code;
@@ -376,7 +376,7 @@ Code *EnumCodeSemanticAction(Enum *enumm, Code *next) {
 Code *InterfaceCodeSemanticAction(Interface *interface, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = INTERFACE;
+	code->statement = INTERFACE_ST;
 	code->interface = interface;
 	code->next = next;
 	return code;
@@ -385,7 +385,7 @@ Code *InterfaceCodeSemanticAction(Interface *interface, Code *next) {
 Code *FunctionCallCodeSemanticAction(FunctionCall *functionCall, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = FUNCTIONCALL;
+	code->statement = FUNCTIONCALL_ST;
 	code->functionCall = functionCall;
 	code->next = next;
 	return code;
@@ -394,7 +394,7 @@ Code *FunctionCallCodeSemanticAction(FunctionCall *functionCall, Code *next) {
 Code *FunctionDeclarationCodeSemanticAction(FunctionDeclaration *functionDeclaration, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = FUNCTION_DECLARATION;
+	code->statement = FUNCTION_DECLARATION_ST;
 	code->FunctionDeclaration = functionDeclaration;
 	code->next = next;
 	return code;
@@ -403,7 +403,7 @@ Code *FunctionDeclarationCodeSemanticAction(FunctionDeclaration *functionDeclara
 Code *ArrowFunctionCodeSemanticAction(ArrowFunction *arrowFunction, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = ARROW_FUNCTION;
+	code->statement = ARROW_FUNCTION_ST;
 	code->arrowFunction = arrowFunction;
 	code->next = next;
 	return code;
@@ -412,7 +412,7 @@ Code *ArrowFunctionCodeSemanticAction(ArrowFunction *arrowFunction, Code *next) 
 Code *AsyncFunctionCodeSemanticAction(AsyncFunction *asyncFunction, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = ASYNC_FUNCTION;
+	code->statement = ASYNC_FUNCTION_ST;
 	code->asyncFunction = asyncFunction;
 	code->next = next;
 	return code;
@@ -421,7 +421,7 @@ Code *AsyncFunctionCodeSemanticAction(AsyncFunction *asyncFunction, Code *next) 
 Code *WhileCodeSemanticAction(WhileLoop *whileLoop, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = WHILE;
+	code->statement = WHILE_ST;
 	code->whileLoop = whileLoop;
 	code->next = next;
 	return code;
@@ -430,7 +430,7 @@ Code *WhileCodeSemanticAction(WhileLoop *whileLoop, Code *next) {
 Code *ExpressionCodeSemanticAction(Expression *expression, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Code *code = malloc(sizeof(Code));
-	code->statement = EXPRESSION;
+	code->statement = EXPRESSION_ST;
 	code->expression = expression;
 	code->next = next;
 	return code;

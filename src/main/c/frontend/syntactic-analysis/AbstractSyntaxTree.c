@@ -233,34 +233,34 @@ void releaseCode(Code *code) {
 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
 	if (code != NULL) {
 		switch (code->statement) {
-			case IF:
+			case IF_ST:
 				releaseIf(code->ifStatement);
 				break;
-			case FOR:
+			case FOR_ST:
 				releaseFor(code->forLoop);
 				break;
-			case WHILE:
+			case WHILE_ST:
 				releaseWhile(code->whileLoop);
 				break;
-			case FUNCTION_DECLARATION:
+			case FUNCTION_DECLARATION_ST:
 				releaseFunctionDeclaration(code->FunctionDeclaration);
 				break;
-			case ARROW_FUNCTION:
+			case ARROW_FUNCTION_ST:
 				releaseArrowFunction(code->arrowFunction);
 				break;
-			case ASYNC_FUNCTION:
+			case ASYNC_FUNCTION_ST:
 				releaseAysncFunction(code->asyncFunction);
 				break;
-			case DECLARATION:
+			case DECLARATION_ST:
 				releaseDeclaration(code->declaration);
 				break;
-			case EXPRESSION:
+			case EXPRESSION_ST:
 				releaseExpression(code->expression);
 				break;
-			case VARIABLE:
+			case VARIABLE_ST:
 				releaseVariable(code->variable);
 				break;
-			case FUNCTIONCALL:
+			case FUNCTIONCALL_ST:
 				releaseFunctionCall(code->functionCall);
 				break;
 		}

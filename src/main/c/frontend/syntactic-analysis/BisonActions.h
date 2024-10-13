@@ -20,10 +20,10 @@ void shutdownBisonActionsModule();
 
 DataType getDataType(char *name);
 
-Constant *IntValueSemanticAction(int value);
-Constant *FloatValueSemanticAction(float value);
-Constant *StringValueSemanticAction(char *value);
-Constant *BooleanValueSemanticAction(char value);
+Constant *IntConstantSemanticAction(int value);
+Constant *FloatConstantSemanticAction(float value);
+Constant *StringConstantSemanticAction(char *value);
+Constant *BooleanConstantSemanticAction(char value);
 
 Expression *ExpressionSemanticAction(Expression *leftExpression, Expression *rightExpression, ExpressionType type);
 Expression *FactorExpressionSemanticAction(Factor *factor);
@@ -47,7 +47,7 @@ VariableList *VariableListSemanticAction(Variable *variable, VariableList *next)
 Interface *InterfaceSemanticAction(char *id, VariableTypeList *variables);
 Enum *EnumSemanticAction(char *id, ArgumentList *values);
 
-PromiseReturn *PromiseReturnSemanticAction(Type *returnType);
+PromiseReturnType *PromiseReturnTypeSemanticAction(Type *returnType);
 Declaration *DeclarationSemanticAction(DeclarationType type, VariableType *variableType, Expression *expression);
 IfStatement *IfSemanticAction(Expression *expression, StatementType *statement, Expression *elseExpression);
 ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expression *update, ForLoopType type);

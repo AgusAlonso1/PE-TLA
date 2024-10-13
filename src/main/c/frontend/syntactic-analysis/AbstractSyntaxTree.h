@@ -17,21 +17,30 @@ void shutdownAbstractSyntaxTreeModule();
 typedef enum ExpressionType ExpressionType;
 typedef enum FactorType FactorType;
 typedef enum DeclarationType DeclarationType;
+typedef enum AssignOperator AssignOperator;
 typedef enum StatementType StatementType;
 typedef enum DataType DataType;
 typedef enum IncDecType IncDecType;
 typedef enum IncDecPosition IncDecPosition;
 typedef enum ForLoopType ForLoopType;
+typedef enum IterableType IterableType;
 
 typedef union Type Type;
+typedef struct IterableVariable IterableVariable;
+
 typedef struct Constant Constant;
+typedef struct Array Array;
+typedef struct ArrayContent ArrayContent;
+
+typedef struct ObjectContent ObjectContent;
+typedef struct Object Object;
+
 typedef struct IncDec IncDec;
 typedef struct Expression Expression;
 typedef struct Factor Factor;
 
 typedef struct Variable Variable;
 typedef struct VariableType VariableType;
-
 typedef struct Declaration Declaration;
 
 typedef struct ArgumentList ArgumentList;
@@ -47,7 +56,7 @@ typedef struct WhileLoop WhileLoop;
 typedef struct Interface Interface;
 typedef struct Enum Enum;
 
-typedef struct PromiseReturn PromiseReturn;
+typedef struct PromiseReturnType PromiseReturnType;
 
 typedef struct FunctionCall FunctionCall;
 typedef struct FunctionDeclaration FunctionDeclaration;
@@ -93,19 +102,27 @@ enum DeclarationType {
 	VAR_DT
 };
 
+enum AssignOperator {
+	ASSIGNMENT,
+	ASSIGNMENT_ADD,
+	ASSIGNMENT_SUB,
+	ASSIGNMENT_MUL,
+	ASSIGNMENT_DIV
+};
+
 enum StatementType {
-	IF,
-	WHILE,
-	FOR,
-	DECLARATION,
-	EXPRESSION,
-	VARIABLE,
-	FUNCTIONCALL,
-	FUNCTION_DECLARATION,
-	ARROW_FUNCTION,
-	ASYNC_FUNCTION,
-	ENUM,
-	INTERFACE
+	IF_ST,
+	WHILE_ST,
+	FOR_ST,
+	DECLARATION_ST,
+	EXPRESSION_ST,
+	VARIABLE_ST,
+	FUNCTIONCALL_ST,
+	FUNCTION_DECLARATION_ST,
+	ARROW_FUNCTION_ST,
+	ASYNC_FUNCTION_ST,
+	ENUM_ST,
+	INTERFACE_ST
 };
 
 enum DataType {
@@ -114,7 +131,22 @@ enum DataType {
 	BOOLEAN,
 	ANY,
 	UNDEFINED,
-	VOID,
+	VOID
+};
+
+enum ObjectType {
+	NBR_ARRAY,
+	STR_ARRAY,
+	BOOL_ARRAY,
+	ANY_ARRAY,
+	UNDEFINED_ARRAY,
+	OBJECT
+};
+
+enum specialType {
+	ANY,
+	UNKOWN,
+	NEVER
 };
 
 union Type {
@@ -142,7 +174,7 @@ struct Variable {
 	Expression *value;
 };
 
-struct PromiseReturn {
+struct PromiseReturnType {
 	Type *type;
 };
 
@@ -194,11 +226,6 @@ struct FunctionCall {
 	ArgumentList *arguments;
 };
 
-struct VariableTypeList {
-	VariableType *variable;
-	VariableTypeList *next;
-};
-
 struct ArgumentList {
 	Expression *expression;
 	ArgumentList *next;
@@ -226,6 +253,35 @@ struct Enum {
 
 struct await {
 	Expression *expression;
+};
+
+struct ArrayContent {
+	Expression *value;
+	ArrayContent *next;
+};
+
+struct Array {
+	ArrayContent *arrayContent;
+	char *id;
+};
+
+struct ObjectContent {
+	char *key;
+	Expression *value;
+	ObjectContent *next;
+};
+
+struct Object {
+	char *id;
+	VariableList *variables;
+};
+
+struct IterableVariable {
+	union {
+		Array *array;
+		Object *object;
+	};
+	IterableType type;
 };
 
 enum ForLoopType {
@@ -268,20 +324,20 @@ struct WhileLoop {
 struct FunctionDeclaration {
 	char *id;
 	VariableType *arguments;
-	DataType returnType;
+	Type *returnType;
 	Code *body;
 };
 
 struct ArrowFunction {
 	VariableType *arguments;
-	DataType returnType;
+	Type *returnType;
 	Code *body;
 };
 
 struct AsyncFunction {
 	char *id;
 	VariableTypeList *arguments;
-	DataType returnType;
+	Type *returnType;
 	Code *body;
 };
 
