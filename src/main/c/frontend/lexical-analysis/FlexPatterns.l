@@ -41,8 +41,7 @@ boolean         (true|false)
 <MULTILINE_COMMENT>.				                                        				{ IgnoredLexemeAction(createLexicalAnalyzerContext()); }
 <MULTILINE_COMMENT>"*/"				                                        				{ EndMultilineCommentLexemeAction(createLexicalAnalyzerContext()); BEGIN(INITIAL); }
 
-"string|number|boolean|any|undefined|null|void|unknown|never"               				{ return SingleTypeLexemeAction(createLexicalAnalyzerContext()); }
-"string[]|number[]|boolean[]|any[]|undefined[]|null[]|void[]|unknown[]|never[]"				{ return SingleTypeLexemeAction(createLexicalAnalyzerContext()); }
+"(string|number|boolean|any|undefined|null|void|unknown|never)(\\[\\])?"  					{ return SingleTypeLexemeAction(createLexicalAnalyzerContext()); }
 
 "-"									                                        				{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), SUB); }
 "*"									                                        				{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), MUL); }
@@ -61,10 +60,7 @@ boolean         (true|false)
 "&&"                                                                        				{ return LogicalOperatorLexemeAction(createLexicalAnalyzerContext(), ADD); }
 "||"                                                                        				{ return LogicalOperatorLexemeAction(createLexicalAnalyzerContext(), OR); }
 
-"+="                                                                        				{ return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), ADD_ASSIGN); }
-"-="                                                                        				{ return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), SUB_ASSIGN); }
-"*="                                                                        				{ return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), MUL_ASSIGN); }
-"/="                                                                        				{ return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), DIV_ASSIGN); }
+"="                                                                                         { return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), ASSIGN); }
 "++"                                                                        				{ return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), INCREMENT); }
 "--"                                                                        				{ return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), DECREMENT); }
 "!"																							{ return AssignmentOperatorLexemeAction(createLexicalAnalyzerContext(), NOT); }

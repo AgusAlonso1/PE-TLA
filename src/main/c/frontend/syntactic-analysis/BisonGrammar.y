@@ -127,6 +127,7 @@
 %token <token> MUL
 %token <token> SUB
 
+%token <token> ASSIGN
 %token <token> GREATER
 %token <token> LESS
 %token <token> NEQUAL
@@ -138,11 +139,6 @@
 %token <token> OR
 %token <token> AND
 %token <token> NOT
-
-%token <token> ADD_ASSIGN
-%token <token> SUB_ASSIGN
-%token <token> MUL_ASSIGN
-%token <token> DIV_ASSIGN
 
 %token <token> ARROW
 %token <token> ASYNC
@@ -235,6 +231,7 @@ expression: expression[left] ADD expression[right]																						{ $$ = E
 	| expression[left] GREATER expression[right] 																						{ $$ = ExpressionSemanticAction($left, $right, GREATER_OP); }
 	| expression[left] LESS expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, LESS_OP); }
 	| expression[left] EQUAL expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, EQUAL_OP); }
+	| expression[left] ASSIGN expression[right] 																						{ $$ = ExpressionSemanticAction($left, $right, ASSIGN_OP); }
 	| expression[left] NEQUAL expression[right] 																						{ $$ = ExpressionSemanticAction($left, $right, NEQUAL_OP); }
 	| expression[left] STRICT_EQUAL expression[right] 																					{ $$ = ExpressionSemanticAction($left, $right, STRICT_EQUAL_OP); }
 	| expression[left] STRICT_NEQUAL expression[right] 																					{ $$ = ExpressionSemanticAction($left, $right, STRICT_NEQUAL_OP); }
@@ -283,28 +280,28 @@ promiseReturnType: PROMISE GREATER type LESS																								{ $$ = Promi
 	;
 
 // Variable declaration and assignment -----------------------------------------------------------------------------------------------------------------
-declaration: LET variableType EQUAL expression																								{ $$ = DeclarationSemanticAction(LET_DT, $2, $4); }
+declaration: LET variableType ASSIGN expression																								{ $$ = DeclarationSemanticAction(LET_DT, $2, $4); }
 	| LET variableType																														{ $$ = DeclarationSemanticAction(LET_DT, $2, NULL); }
-	| LET variableType EQUAL OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(LET_DT, $2, $5); }
-	| LET variableType EQUAL OPEN_BRACE objectContent CLOSE_BRACE																			{ $$ = DeclarationObjectSemanticAction(LET_DT, $2, $5); }
-	| CONST variableType EQUAL expression 								       																{ $$ = DeclarationSemanticAction(CONST_DT, $2, $4); }
-	| CONST variableType EQUAL OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(CONST_DT, $2, $5); }
-	| VAR variableType EQUAL expression																										{ $$ = DeclarationSemanticAction(VAR_DT, $2, $4); }
+	| LET variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(LET_DT, $2, $5); }
+	| LET variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																			{ $$ = DeclarationObjectSemanticAction(LET_DT, $2, $5); }
+	| CONST variableType ASSIGN expression 								       																{ $$ = DeclarationSemanticAction(CONST_DT, $2, $4); }
+	| CONST variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(CONST_DT, $2, $5); }
+	| VAR variableType ASSIGN expression																										{ $$ = DeclarationSemanticAction(VAR_DT, $2, $4); }
 	| VAR variableType																														{ $$ = DeclarationSemanticAction(VAR_DT, $2, NULL); }
-	| VAR variableType EQUAL OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(VAR_DT, $2, $5); }
+	| VAR variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(VAR_DT, $2, $5); }
 //	| declaration COMA variableType													{ } // VER
 	;
 
-typeDeclaration: TYPE ID EQUAL objectContent																								{ $$ = ObjectTypeDeclarationSemanticAction($2, $4); }
-	| TYPE ID EQUAL expression																												{ $$ = VariableTypeDeclarationSemanticAction($2, $4); }
-	| TYPE ID EQUAL OPEN_BRACKET arrayContent CLOSE_BRACKET 																				{ $$ = ArrayTypeDeclarationSemanticAction($2, $5); }
+typeDeclaration: TYPE ID ASSIGN objectContent																								{ $$ = ObjectTypeDeclarationSemanticAction($2, $4); }
+	| TYPE ID ASSIGN expression																												{ $$ = VariableTypeDeclarationSemanticAction($2, $4); }
+	| TYPE ID ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET 																				{ $$ = ArrayTypeDeclarationSemanticAction($2, $5); }
 	| ENUM ID OPEN_BRACE argumentList CLOSE_BRACE 																							{ $$ = EnumTypeDeclarationSemanticAction($2,$4); }
 	| INTERFACE ID OPEN_BRACE variableTypeList CLOSE_BRACE 																					{ $$ = InterfaceTypeDeclarationSemanticAction($2,$4); }
 	;
 
-variable: variableType EQUAL expression																										{ $$ = VariableSemanticAction($1, $3); }
-	| variableType EQUAL OPEN_BRACKET arrayContent CLOSE_BRACKET																			{ $$ = VariableArraySemanticAction($1, $4); }
-	| variableType EQUAL OPEN_BRACE objectContent CLOSE_BRACE																				{ $$ = VariableObjectSemanticAction($1, $4); }
+variable: variableType ASSIGN expression																										{ $$ = VariableSemanticAction($1, $3); }
+	| variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																			{ $$ = VariableArraySemanticAction($1, $4); }
+	| variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																				{ $$ = VariableObjectSemanticAction($1, $4); }
 	;
 
 variableList: variable																														{ $$ = VariableListSemanticAction($1, NULL); }
