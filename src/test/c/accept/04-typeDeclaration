@@ -1,5 +1,3 @@
 enum Color {Red, Green, Blue}
 interface Square { color: string, sideLength: number}
-type obj = 2
 type array = [1, 2, 3, 4]
-type obj2 = {a: number, b: string}
