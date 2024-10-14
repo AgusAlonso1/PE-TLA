@@ -220,7 +220,6 @@ VariableList *VariableListSemanticAction(Variable *variable, VariableList *next)
 	return variableList;
 }
 
-
 Variable *VariableSemanticAction(VariableType *variableType, Expression *expression) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Variable *assignVariable = malloc(sizeof(Variable));
@@ -447,7 +446,7 @@ ArrowFunction *ArrowFunctionSemanticAction(VariableList *arguments, Type *return
 	return arrowFunction;
 }
 
-AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments,  PromiseReturnType *promiseReturnType, Code *body) {
+AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, PromiseReturnType *promiseReturnType, Code *body) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	AsyncFunction *asyncFunction = malloc(sizeof(asyncFunction));
 	asyncFunction->id = malloc(strlen(id) + 1);
@@ -554,6 +553,14 @@ Code *IncDecCodeSemanticAction(IncDec *incDec, Code *next) {
 	Code *code = malloc(sizeof(Code));
 	code->statement = INC_DEC_ST;
 	code->incDec = incDec;
+	code->next = next;
+	return code;
+}
+
+Code *ReturnCodeSemanticAction(Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Code *code = malloc(sizeof(Code));
+	code->statement = RETURN_ST;
 	code->next = next;
 	return code;
 }

@@ -79,6 +79,7 @@ Code *AsyncFunctionCodeSemanticAction(AsyncFunction *asyncFunction, Code *next);
 Code *WhileCodeSemanticAction(WhileLoop *whileLoop, Code *next);
 Code *ExpressionCodeSemanticAction(Expression *expression, Code *next);
 Code *IncDecCodeSemanticAction(IncDec *incDec, Code *next);
+Code *ReturnCodeSemanticAction(Code *next);
 
 Program *CodeProgramSemanticAction(CompilerState *compilerState, Code *code);
 

@@ -41,7 +41,8 @@ boolean         (true|false)
 <MULTILINE_COMMENT>.				                                        				{ IgnoredLexemeAction(createLexicalAnalyzerContext()); }
 <MULTILINE_COMMENT>"*/"				                                        				{ EndMultilineCommentLexemeAction(createLexicalAnalyzerContext()); BEGIN(INITIAL); }
 
-"(string|number|boolean|any|undefined|null|void|unknown|never)(\\[\\])?"  					{ return SingleTypeLexemeAction(createLexicalAnalyzerContext()); }
+("string"|"number"|"boolean"|"any"|"undefined"|"null"|"void"|"unknown"|"never")  			{ return SingleTypeLexemeAction(createLexicalAnalyzerContext()); }
+("string"|"number"|"boolean"|"any"|"undefined"|"null"|"void"|"unknown"|"never")(\[\])		{ return SingleTypeLexemeAction(createLexicalAnalyzerContext()); }
 
 "-"									                                        				{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), SUB); }
 "*"									                                        				{ return ArithmeticOperatorLexemeAction(createLexicalAnalyzerContext(), MUL); }
@@ -92,6 +93,7 @@ boolean         (true|false)
 "async"                                                                     				{ return KeywordLexemeAction(createLexicalAnalyzerContext(), ASYNC); }
 "Promise"                                                                   				{ return KeywordLexemeAction(createLexicalAnalyzerContext(), PROMISE); }
 "await" 																   					{ return KeywordLexemeAction(createLexicalAnalyzerContext(), AWAIT); }
+"return" 	                                                                                { return KeywordLexemeAction(createLexicalAnalyzerContext(), RETURN); }
 [[:digit:]]+						                                        				{ return IntegerLexemeAction(createLexicalAnalyzerContext()); }
 {number} 																 					{ return NumberLexemeAction(createLexicalAnalyzerContext()); }
 {string}																					{ return StringLexemeAction(createLexicalAnalyzerContext()); }

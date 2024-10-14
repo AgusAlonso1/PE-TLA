@@ -93,6 +93,7 @@
 %token <token> ENUM
 %token <token> ELSE
 %token <token> OF
+%token <token> RETURN
 
 %token <token> LET
 %token <token> CONST
@@ -210,6 +211,7 @@ code: ifStatement code 																		 												{ $$ = IfCodeSemanticActio
 	| asyncFunction code 															 														{ $$ = AsyncFunctionCodeSemanticAction($1, $2); }
 	| expression code 															 															{ $$ = ExpressionCodeSemanticAction($1, $2); }
 	| incDec code 																															{ $$ = IncDecCodeSemanticAction($1, $2); }
+	| RETURN code 																															{ $$ = ReturnCodeSemanticAction($2); }
 	| %empty																																{ $$ = NULL; }
 	;
 
@@ -231,7 +233,6 @@ expression: expression[left] ADD expression[right]																						{ $$ = E
 	| expression[left] GREATER expression[right] 																						{ $$ = ExpressionSemanticAction($left, $right, GREATER_OP); }
 	| expression[left] LESS expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, LESS_OP); }
 	| expression[left] EQUAL expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, EQUAL_OP); }
-	| expression[left] ASSIGN expression[right] 																						{ $$ = ExpressionSemanticAction($left, $right, ASSIGN_OP); }
 	| expression[left] NEQUAL expression[right] 																						{ $$ = ExpressionSemanticAction($left, $right, NEQUAL_OP); }
 	| expression[left] STRICT_EQUAL expression[right] 																					{ $$ = ExpressionSemanticAction($left, $right, STRICT_EQUAL_OP); }
 	| expression[left] STRICT_NEQUAL expression[right] 																					{ $$ = ExpressionSemanticAction($left, $right, STRICT_NEQUAL_OP); }
@@ -306,14 +307,17 @@ variable: variableType ASSIGN expression																										{ $$ = Variabl
 
 variableList: variable																														{ $$ = VariableListSemanticAction($1, NULL); }
 	| variable COMA variableList  																											{ $$ = VariableListSemanticAction($1, $3); }
+	| %empty																																{ $$ = NULL; }
 	;
 
 variableTypeList: variableType																												{ $$ = VariableTypeListSemanticAction($1, NULL); }
 	| variableType COMA variableTypeList																									{ $$ = VariableTypeListSemanticAction($1, $3); }
+	| %empty																																{ $$ = NULL; }
 	;
 
 argumentList: expression																													{ $$ = ArgumentListSemanticAction($1, NULL); }
 	| expression COMA argumentList																											{ $$ = ArgumentListSemanticAction($1, $3); }
+	| %empty																																{ $$ = NULL; }
 	;
 
 /* iterableVariable: ID  																														{ $$ = IterableVariableSemanticAction($1); }

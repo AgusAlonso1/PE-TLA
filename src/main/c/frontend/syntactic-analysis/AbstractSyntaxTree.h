@@ -121,7 +121,8 @@ enum StatementType {
 	ARROW_FUNCTION_ST,
 	ASYNC_FUNCTION_ST,
 	TYPE_DECLARATION_ST,
-	INC_DEC_ST
+	INC_DEC_ST,
+	RETURN_ST
 };
 
 enum DataType {
@@ -251,7 +252,7 @@ struct ArgumentList {
 };
 
 struct VariableTypeList {
-	VariableType * variableType;
+	VariableType *variableType;
 	VariableTypeList *next;
 };
 

@@ -1,0 +1,5 @@
+let hola:number = 1
+
+function blah():number {
+	return 1
+}

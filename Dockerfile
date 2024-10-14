@@ -23,3 +23,4 @@ RUN /home/ubuntu/script/ubuntu/install.sh
 # Clean up image
 RUN rm --force --recursive /home/ubuntu/script
 
+ENV LOGGING_LEVEL=DEBUGGING
