@@ -26,7 +26,7 @@ typedef enum ForLoopType ForLoopType;
 typedef enum IterableType IterableType;
 typedef enum UserType UserType;
 
-typedef union Type Type;
+typedef struct Type Type;
 typedef struct TypeDeclaration TypeDeclaration;
 typedef struct IterableVariable IterableVariable;
 
@@ -45,7 +45,6 @@ typedef struct Declaration Declaration;
 
 typedef struct ArgumentList ArgumentList;
 typedef struct VariableList VariableList;
-typedef struct VariableTypeList VariableTypeList;
 typedef struct VariableTypeList VariableTypeList;
 
 typedef struct ParamsFor ParamsFor;
@@ -121,7 +120,8 @@ enum StatementType {
 	FUNCTION_DECLARATION_ST,
 	ARROW_FUNCTION_ST,
 	ASYNC_FUNCTION_ST,
-	TYPE_DECLARATION_ST
+	TYPE_DECLARATION_ST,
+	INC_DEC_ST
 };
 
 enum DataType {
@@ -161,9 +161,9 @@ enum IncDecPosition {
 	POSTFIX
 };
 
-union Type {
+struct Type {
 	DataType singleType;
-	DataType *unionType;
+	Type *next;
 };
 
 struct Constant {
@@ -178,7 +178,7 @@ struct Constant {
 
 struct VariableType {
 	char *id;
-	DataType type;
+	Type *type;
 };
 
 struct Variable {
@@ -208,7 +208,7 @@ struct TypeDeclaration {
 		Expression *expression;
 		ArrayContent *arrayContent;
 		VariableTypeList *interface;
-		VariableList *enumm;
+		ArgumentList *enumm;
 	};
 };
 
@@ -251,13 +251,13 @@ struct ArgumentList {
 };
 
 struct VariableTypeList {
-	VariableType *variableType;
-	struct variableTypeList *next;
+	VariableType * variableType;
+	VariableTypeList *next;
 };
 
 struct VariableList {
 	Variable *variable;
-	struct variableList *next;
+	VariableList *next;
 };
 
 struct await {
@@ -324,13 +324,13 @@ struct WhileLoop {
 
 struct FunctionDeclaration {
 	char *id;
-	VariableType *arguments;
+	VariableList *arguments;
 	Type *returnType;
 	Code *body;
 };
 
 struct ArrowFunction {
-	VariableType *arguments;
+	VariableList *arguments;
 	Type *returnType;
 	Code *body;
 };
@@ -338,7 +338,7 @@ struct ArrowFunction {
 struct AsyncFunction {
 	char *id;
 	VariableTypeList *arguments;
-	Type *returnType;
+	PromiseReturnType *promiseReturnType;
 	Code *body;
 };
 
@@ -356,6 +356,7 @@ struct Code {
 		ArrowFunction *arrowFunction;
 		AsyncFunction *asyncFunction;
 		TypeDeclaration *typeDeclaration;
+		IncDec *incDec;
 	};
 	struct Code *next;
 };

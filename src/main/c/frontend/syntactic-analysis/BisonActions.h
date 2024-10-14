@@ -30,15 +30,18 @@ Expression *FactorExpressionSemanticAction(Factor *factor);
 Factor *ConstantFactorSemanticAction(Constant *constant);
 Factor *VariableFactorSemanticAction(char *variableName);
 Factor *ExpressionFactorSemanticAction(Expression *expression);
+Factor *FunctionCallFactorSemanticAction(FunctionCall *functionCall);
 
-Type *SingleTypeSemanticAction(char *singleType);
-Type *UnionTypeSemanticAction(char *firstType, ...);
+Type *SingleTypeSemanticAction(char *singleType, Type *next);
 Type *ArrayTypeSemanticAction(char *id);
 
 DataType getDataType(char *name);
-VariableType *VariableTypeSemanticAction(char *id, Type *typeName);
+VariableType *VariableTypeSemanticAction(char *id, Type *type);
 VariableTypeList *VariableTypeListSemanticAction(VariableType *variableType, VariableTypeList *next);
 VariableList *VariableListSemanticAction(Variable *variable, VariableList *next);
+Variable *VariableSemanticAction(VariableType *variableType, Expression *expression);
+Variable *VariableArraySemanticAction(VariableType *variableType, ArrayContent *arrayContent);
+Variable *VariableObjectSemanticAction(VariableType *variableType, ObjectContent *objectContent);
 PromiseReturnType *PromiseReturnTypeSemanticAction(Type *returnType);
 ObjectContent *ObjectContentSemanticAction(char *key, Expression *expression, ObjectContent *next);
 ArrayContent *ArrayContentSemanticAction(Expression *expression, ArrayContent *next);
@@ -49,21 +52,21 @@ Declaration *DeclarationObjectSemanticAction(DeclarationType type, VariableType 
 
 TypeDeclaration *ObjectTypeDeclarationSemanticAction(char *id, ObjectContent *objectContent);
 TypeDeclaration *VariableTypeDeclarationSemanticAction(char *id, Expression *expression);
-TypeDeclaration *ArrayDeclarationSemanticAction(char *id, ArrayContent *arrayContent);
-TypeDeclaration *EnumTypeDeclarationSemanticAction(char *id, VariableList *enumm);
+TypeDeclaration *ArrayTypeDeclarationSemanticAction(char *id, ArrayContent *arrayContent);
+TypeDeclaration *EnumTypeDeclarationSemanticAction(char *id, ArgumentList *enumm);
 TypeDeclaration *InterfaceTypeDeclarationSemanticAction(char *id, VariableTypeList *interface);
 
-IfStatement *IfSemanticAction(Expression *expression, StatementType *statement, Expression *elseExpression);
+IfStatement *IfSemanticAction(Expression *expression, Code *statement, Code *elseStatement);
 ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expression *update, VariableList *iterable, ForLoopType type);
 ForLoop *ForLoopSemanticAction(ParamsFor *params, Code *code);
 WhileLoop *WhileSemanticAction(Expression *condition, Code *code);
 Expression *AwaitExpressionSemanticAction(Expression *expression);
 
 ArgumentList *ArgumentListSemanticAction(Expression *expression, ArgumentList *next);
-FunctionCall *functionCallSemanticAction(char *id, ArgumentList *arguments);
-FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableType *arguments, Type *returnType, Code *body);
-ArrowFunction *ArrowFunctionSemanticAction(VariableType *arguments, Type *returnType, Code *body);
-AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, Type *returnType, Code *body);
+FunctionCall *FunctionCallSemanticAction(char *id, ArgumentList *arguments);
+FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableList *arguments, Type *returnType, Code *body);
+ArrowFunction *ArrowFunctionSemanticAction(VariableList *arguments, Type *returnType, Code *body);
+AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, PromiseReturnType *promiseReturnType, Code *body);
 
 Code *IfCodeSemanticAction(IfStatement *ifStatement, Code *next);
 Code *ForCodeSemanticAction(ForLoop *forLoop, Code *next);
@@ -75,6 +78,7 @@ Code *ArrowFunctionCodeSemanticAction(ArrowFunction *arrowFunction, Code *next);
 Code *AsyncFunctionCodeSemanticAction(AsyncFunction *asyncFunction, Code *next);
 Code *WhileCodeSemanticAction(WhileLoop *whileLoop, Code *next);
 Code *ExpressionCodeSemanticAction(Expression *expression, Code *next);
+Code *IncDecCodeSemanticAction(IncDec *incDec, Code *next);
 
 Program *CodeProgramSemanticAction(CompilerState *compilerState, Code *code);
 
