@@ -21,14 +21,32 @@ void shutdownFlexActionsModule();
  * Flex lexeme processing actions.
  */
 
-void BeginMultilineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
-void EndMultilineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
-void IgnoredLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+void BeginMultilineCommentLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+void EndMultilineCommentLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
-Token ArithmeticOperatorLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token token);
-Token IntegerLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
-Token ParenthesisLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token token);
+Token VariableModificatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+void EndSentenceLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
-Token UnknownLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+void IgnoredLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+
+Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token NumberLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token BooleanLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token StringLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+
+Token ArithmeticOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token ComparisonOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token LogicalOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token AssignmentOperatorLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token ValueLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token IntegerLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+
+Token UnknownLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+
+Token SingleTypeLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
+Token KeywordLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token DelimiterLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token VariableDeclarationLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext, Token token);
+Token IdentifierLexemeAction(LexicalAnalyzerContext *lexicalAnalyzerContext);
 
 #endif
