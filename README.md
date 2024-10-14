@@ -1,7 +1,7 @@
 ## Comentarios para la segunda entrega
 
 Los casos de prueba implementados en esta segunda entrega, fueron adaptados para específicamente el Frontend. Para la entrega final, nos encargaremos de validar los casos correspondientes, con el Backend ya finalizado.
-Además, cabe aclarar que tenemos un error de segmentation fault, el cual creemos que no depende de los testeos. Lo vamos a analizar para el futuro.
+Además, cabe aclarar que tenemos un error de segmentation fault, el cual creemos que no depende de los testeos. Lo vamos a analizar para el futuro. Al compilar tarda mucho, creemos que hay que corregir la gramática.
 
 [![✗](https://img.shields.io/badge/Release-v1.1.0-ffb600.svg?style=for-the-badge)](https://github.com/agustin-golmar/Flex-Bison-Compiler/releases)
 
