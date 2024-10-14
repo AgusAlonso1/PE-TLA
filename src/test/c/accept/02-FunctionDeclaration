@@ -1,3 +1,4 @@
-function hola(n:number):number {
-	return n - 1
-}
+let n = 2
+let obj = { previous: "previous", next: "next" }
+enum Color {Red, Green, Blue}
+interface Square { color: string, sideLength: number}

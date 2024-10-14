@@ -29,7 +29,7 @@
 	VariableList * variableList;
 	VariableTypeList * variableTypeList;
 	ArgumentList * argumentList;
-	AssignOperator * assignOperator;
+	Assign * assign;
 	Variable * variable;
 	Expression * expression;
 	IncDec * incDec;
@@ -160,6 +160,7 @@
 %type <argumentList> argumentList
 %type <variableList> variableList
 %type <variableTypeList> variableTypeList
+%type <assign> assign
 
 
 %type <variable> variable
@@ -191,6 +192,9 @@
  */
 %left ADD SUB
 %left MUL DIV
+%left GREATER LESS EQUAL NEQUAL STRICT_EQUAL STRICT_NEQUAL LESS_EQUAL GREATER_EQUAL
+%left OR AND NOT
+%left INCREMENT DECREMENT
 
 %%
 
@@ -212,6 +216,7 @@ code: ifStatement code 																		 												{ $$ = IfCodeSemanticActio
 	| expression code 															 															{ $$ = ExpressionCodeSemanticAction($1, $2); }
 	| incDec code 																															{ $$ = IncDecCodeSemanticAction($1, $2); }
 	| RETURN code 																															{ $$ = ReturnCodeSemanticAction($2); }
+	| assign code  																															{ $$ = AssignCodeSemanticAction($1, $2); }
 	| %empty																																{ $$ = NULL; }
 	;
 
@@ -250,6 +255,11 @@ factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS																					{ $$ =
 	| functionCall 																														{ $$ = FunctionCallFactorSemanticAction($1); }
 	;
 
+assign: ID ASSIGN expression																											{ $$ = AssignExpressionSemanticAction($1, $3); }
+	| ID ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																					{ $$ = AssignArraySemanticAction($1, $4); }
+	| ID ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																					{ $$ = AssignObjectSemanticAction($1, $4); }
+	;
+
 // Type -------------------------------------------------------------------------------------------------------------------------------------------------
 type: SINGLE_TYPE																    														{ $$ = SingleTypeSemanticAction($1, NULL); }
 	| SINGLE_TYPE PIPE type																													{ $$ = SingleTypeSemanticAction($1, $3); }
@@ -267,7 +277,7 @@ constant: INT_VALUE																															{ $$ = IntConstantSemanticActi
 	| BOOL_VALUE																															{ $$ = BooleanConstantSemanticAction($1); }
 	;
 	
-arrayContent: expression COLON arrayContent 																								{ $$ = ArrayContentSemanticAction($1, $3); }
+arrayContent: expression COMA arrayContent 																								{ $$ = ArrayContentSemanticAction($1, $3); }
 	| expression 																															{ $$ = ArrayContentSemanticAction($1, NULL); }
 	| %empty																																{ $$ = NULL; }
 	;
@@ -287,20 +297,20 @@ declaration: LET variableType ASSIGN expression																								{ $$ = De
 	| LET variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																			{ $$ = DeclarationObjectSemanticAction(LET_DT, $2, $5); }
 	| CONST variableType ASSIGN expression 								       																{ $$ = DeclarationSemanticAction(CONST_DT, $2, $4); }
 	| CONST variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(CONST_DT, $2, $5); }
-	| VAR variableType ASSIGN expression																										{ $$ = DeclarationSemanticAction(VAR_DT, $2, $4); }
+	| VAR variableType ASSIGN expression																									{ $$ = DeclarationSemanticAction(VAR_DT, $2, $4); }
 	| VAR variableType																														{ $$ = DeclarationSemanticAction(VAR_DT, $2, NULL); }
 	| VAR variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(VAR_DT, $2, $5); }
 //	| declaration COMA variableType													{ } // VER
 	;
 
-typeDeclaration: TYPE ID ASSIGN objectContent																								{ $$ = ObjectTypeDeclarationSemanticAction($2, $4); }
+typeDeclaration: TYPE ID ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																		{ $$ = ObjectTypeDeclarationSemanticAction($2, $5); }
 	| TYPE ID ASSIGN expression																												{ $$ = VariableTypeDeclarationSemanticAction($2, $4); }
 	| TYPE ID ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET 																				{ $$ = ArrayTypeDeclarationSemanticAction($2, $5); }
 	| ENUM ID OPEN_BRACE argumentList CLOSE_BRACE 																							{ $$ = EnumTypeDeclarationSemanticAction($2,$4); }
 	| INTERFACE ID OPEN_BRACE variableTypeList CLOSE_BRACE 																					{ $$ = InterfaceTypeDeclarationSemanticAction($2,$4); }
 	;
 
-variable: variableType ASSIGN expression																										{ $$ = VariableSemanticAction($1, $3); }
+variable: variableType ASSIGN expression																									{ $$ = VariableSemanticAction($1, $3); }
 	| variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																			{ $$ = VariableArraySemanticAction($1, $4); }
 	| variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																				{ $$ = VariableObjectSemanticAction($1, $4); }
 	;
@@ -350,6 +360,7 @@ functionCall: ID OPEN_PARENTHESIS argumentList CLOSE_PARENTHESIS 															
 	;
 
 functionDeclaration: FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS COLON type OPEN_BRACE code CLOSE_BRACE 					{ $$ = FunctionDeclarationSemanticAction($2,$4,$7,$9); }
+	| FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE 												{ $$ = FunctionDeclarationSemanticAction($2,$4,NULL,$7); }
 	;
 
 arrowFunction: OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS ARROW COLON type OPEN_BRACE code CLOSE_BRACE 							{ $$ = ArrowFunctionSemanticAction($2,$6,$8); }

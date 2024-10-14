@@ -17,7 +17,6 @@ void shutdownAbstractSyntaxTreeModule();
 typedef enum ExpressionType ExpressionType;
 typedef enum FactorType FactorType;
 typedef enum DeclarationType DeclarationType;
-typedef enum AssignOperator AssignOperator;
 typedef enum StatementType StatementType;
 typedef enum DataType DataType;
 typedef enum IncDecType IncDecType;
@@ -29,6 +28,7 @@ typedef enum UserType UserType;
 typedef struct Type Type;
 typedef struct TypeDeclaration TypeDeclaration;
 typedef struct IterableVariable IterableVariable;
+typedef struct Assign Assign;
 
 typedef struct Constant Constant;
 typedef struct ArrayContent ArrayContent;
@@ -101,14 +101,6 @@ enum DeclarationType {
 	VAR_DT
 };
 
-enum AssignOperator {
-	ASSIGNMENT,
-	ASSIGNMENT_ADD,
-	ASSIGNMENT_SUB,
-	ASSIGNMENT_MUL,
-	ASSIGNMENT_DIV
-};
-
 enum StatementType {
 	IF_ST,
 	WHILE_ST,
@@ -122,7 +114,8 @@ enum StatementType {
 	ASYNC_FUNCTION_ST,
 	TYPE_DECLARATION_ST,
 	INC_DEC_ST,
-	RETURN_ST
+	RETURN_ST,
+	ASSIGN_ST
 };
 
 enum DataType {
@@ -184,6 +177,16 @@ struct VariableType {
 
 struct Variable {
 	VariableType *variableType;
+	union {
+		Expression *expression;
+		ArrayContent *arrayContent;
+		ObjectContent *objectContent;
+	};
+	UserType type;
+};
+
+struct Assign {
+	char *id;
 	union {
 		Expression *expression;
 		ArrayContent *arrayContent;
@@ -358,6 +361,7 @@ struct Code {
 		AsyncFunction *asyncFunction;
 		TypeDeclaration *typeDeclaration;
 		IncDec *incDec;
+		Assign *assign;
 	};
 	struct Code *next;
 };

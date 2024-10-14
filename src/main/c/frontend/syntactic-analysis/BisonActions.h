@@ -46,6 +46,10 @@ PromiseReturnType *PromiseReturnTypeSemanticAction(Type *returnType);
 ObjectContent *ObjectContentSemanticAction(char *key, Expression *expression, ObjectContent *next);
 ArrayContent *ArrayContentSemanticAction(Expression *expression, ArrayContent *next);
 
+Assign *AssignExpressionSemanticAction(char *id, Expression *expression);
+Assign *AssignArraySemanticAction(char *id, ArrayContent *arrayContent);
+Assign *AssignObjectSemanticAction(char *id, ObjectContent *objectContent);
+
 Declaration *DeclarationSemanticAction(DeclarationType type, VariableType *variableType, Expression *expression);
 Declaration *DeclarationArraySemanticAction(DeclarationType type, VariableType *variableType, ArrayContent *arrayContent);
 Declaration *DeclarationObjectSemanticAction(DeclarationType type, VariableType *variableType, ObjectContent *objectContent);
@@ -80,6 +84,11 @@ Code *WhileCodeSemanticAction(WhileLoop *whileLoop, Code *next);
 Code *ExpressionCodeSemanticAction(Expression *expression, Code *next);
 Code *IncDecCodeSemanticAction(IncDec *incDec, Code *next);
 Code *ReturnCodeSemanticAction(Code *next);
+Code *AssignCodeSemanticAction(Assign *assign, Code *next);
+
+Assign *AssignExpressionSemanticAction(char *id, Expression *expression);
+Assign *AssignArraySemanticAction(char *id, ArrayContent *arrayContent);
+Assign *AssignObjectSemanticAction(char *id, ObjectContent *objectContent);
 
 Program *CodeProgramSemanticAction(CompilerState *compilerState, Code *code);
 

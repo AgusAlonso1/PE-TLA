@@ -34,6 +34,27 @@ void shutdownAbstractSyntaxTreeModule() {
 // 		free(expression);
 // 	}
 // }
+
+// // void releaseAssign(Assign *assign) {
+// // 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+// // 	if (assign != NULL) {
+// // 		switch (assign->type) {
+// // 			case TYPE_ARRAY:
+// // 				releaseArrayContent(assign->arrayContent);
+// // 				break;
+// // 			case TYPE_OBJECT:
+// // 				releaseObjectContent(assign->objectContent);
+// // 				break;
+// // 			case TYPE_EXPRESSION:
+// // 				releaseExpression(assign->expression);
+// // 				break;
+// // 		}
+// // 		releaseVariableName(assign->id);
+// // 		free(assign);
+// // 	}
+
+// // }
+
 // // Factors -------------------------------------------------------------------------------------------
 // void releaseFactor(Factor *factor) {
 // 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
@@ -84,6 +105,25 @@ void shutdownAbstractSyntaxTreeModule() {
 // 		}
 // 		releaseVariableType(variable->variableType);
 // 		free(variable);
+// 	}
+// }
+
+// void releaseArrayContent(ArrayContent *arrayContent) {
+// 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+// 	if (arrayContent != NULL) {
+// 		releaseExpression(arrayContent->value);
+// 		releaseArrayContent(arrayContent->next);
+// 		free(arrayContent);
+// 	}
+// }
+
+// void releaseObjectContent(ObjectContent *objectContent) {
+// 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+// 	if (objectContent != NULL) {
+// 		releaseVariableName(objectContent->key);
+// 		releaseExpression(objectContent->value);
+// 		releaseObjectContent(objectContent->next);
+// 		free(objectContent);
 // 	}
 // }
 
@@ -147,32 +187,32 @@ void shutdownAbstractSyntaxTreeModule() {
 // 	}
 // }
 
-// void releaseForParams(ParamsFor *params) {
-// 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-// 	if (params != NULL) {
-// 		switch (params->type) {
-// 			case FOR_CLASSIC:
-// 				releaseDeclaration(params->forClassic.init);
-// 				releaseExpression(params->forClassic.condition);
-// 				releaseExpression(params->forClassic.update);
-// 				break;
-// 			default:
-// 				releaseDeclaration(params->forOf.value);
-// 				releaseExpression(params->forOf.iterable);
-// 				break;
-// 		}
-// 		free(params);
-// 	}
-// }
+// // void releaseForParams(ParamsFor *params) {
+// // 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+// // 	if (params != NULL) {
+// // 		switch (params->type) {
+// // 			case FOR_CLASSIC:
+// // 				releaseDeclaration(params->forClassic.init);
+// // 				releaseExpression(params->forClassic.condition);
+// // 				releaseExpression(params->forClassic.update);
+// // 				break;
+// // 			default:
+// // 				releaseDeclaration(params->forOf.value);
+// // 				releaseExpression(params->forOf.iterable);
+// // 				break;
+// // 		}
+// // 		free(params);
+// // 	}
+// // }
 
-// void releaseFor(ForLoop *forLoop) {
-// 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-// 	if (forLoop != NULL) {
-// 		releaseForParams(forLoop->params);
-// 		releaseCode(forLoop->body);
-// 		free(forLoop);
-// 	}
-// }
+// // void releaseFor(ForLoop *forLoop) {
+// // 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+// // 	if (forLoop != NULL) {
+// // 		releaseForParams(forLoop->params);
+// // 		releaseCode(forLoop->body);
+// // 		free(forLoop);
+// // 	}
+// // }
 
 // void releaseWhile(WhileLoop *whileLoop) {
 // 	logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);

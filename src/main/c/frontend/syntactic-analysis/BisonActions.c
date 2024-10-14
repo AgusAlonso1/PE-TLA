@@ -244,6 +244,33 @@ Variable *VariableObjectSemanticAction(VariableType *variableType, ObjectContent
 	return assignVariable;
 }
 
+Assign *AssignExpressionSemanticAction(char *id, Expression *expression) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Assign *assign = malloc(sizeof(Assign));
+	strcpy(assign->id, id);
+	assign->expression = expression;
+	assign->type = TYPE_EXPRESSION;
+	return assign;
+}
+
+Assign *AssignArraySemanticAction(char *id, ArrayContent *arrayContent) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Assign *assign = malloc(sizeof(Assign));
+	strcpy(assign->id, id);
+	assign->arrayContent = arrayContent;
+	assign->type = TYPE_ARRAY;
+	return assign;
+}
+
+Assign *AssignObjectSemanticAction(char *id, ObjectContent *objectContent) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Assign *assign = malloc(sizeof(Assign));
+	strcpy(assign->id, id);
+	assign->objectContent = objectContent;
+	assign->type = TYPE_OBJECT;
+	return assign;
+}
+
 // PromiseReturnType -------------------------------------------------------------------------------------------------------------------------
 PromiseReturnType *PromiseReturnTypeSemanticAction(Type *returnType) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
@@ -410,6 +437,9 @@ Expression *AwaitExpressionSemanticAction(Expression *expression) {
 // Functions -------------------------------------------------------------------------------------------------------------------------
 ArgumentList *ArgumentListSemanticAction(Expression *expression, ArgumentList *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (expression == NULL) {
+		return NULL;
+	}
 	ArgumentList *argList = malloc(sizeof(ArgumentList));
 	argList->expression = malloc(sizeof(Expression));
 	argList->expression = expression;
@@ -419,6 +449,9 @@ ArgumentList *ArgumentListSemanticAction(Expression *expression, ArgumentList *n
 
 FunctionCall *FunctionCallSemanticAction(char *id, ArgumentList *arguments) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (id == NULL) {
+		return NULL;
+	}
 	FunctionCall *functionCall = malloc(sizeof(FunctionCall));
 	functionCall->id = malloc(strlen(id) + 1);
 	strcpy(functionCall->id, id);
@@ -428,6 +461,9 @@ FunctionCall *FunctionCallSemanticAction(char *id, ArgumentList *arguments) {
 
 FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableList *arguments, Type *returnType, Code *body) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (id == NULL) {
+		return NULL;
+	}
 	FunctionDeclaration *functionDeclaration = malloc(sizeof(FunctionDeclaration));
 	functionDeclaration->id = malloc(strlen(id) + 1);
 	strcpy(functionDeclaration->id, id);
@@ -439,6 +475,9 @@ FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableList *a
 
 ArrowFunction *ArrowFunctionSemanticAction(VariableList *arguments, Type *returnType, Code *body) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (arguments == NULL) {
+		return NULL;
+	}
 	ArrowFunction *arrowFunction = malloc(sizeof(ArrowFunction));
 	arrowFunction->arguments = arguments;
 	arrowFunction->returnType = returnType;
@@ -448,6 +487,9 @@ ArrowFunction *ArrowFunctionSemanticAction(VariableList *arguments, Type *return
 
 AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, PromiseReturnType *promiseReturnType, Code *body) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (id == NULL) {
+		return NULL;
+	}
 	AsyncFunction *asyncFunction = malloc(sizeof(asyncFunction));
 	asyncFunction->id = malloc(strlen(id) + 1);
 	strcpy(asyncFunction->id, id);
@@ -460,6 +502,9 @@ AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments
 // Code -------------------------------------------------------------------------------------------------------------------------
 Code *IfCodeSemanticAction(IfStatement *ifStatement, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (ifStatement == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = IF_ST;
 	code->ifStatement = ifStatement;
@@ -469,6 +514,9 @@ Code *IfCodeSemanticAction(IfStatement *ifStatement, Code *next) {
 
 Code *ForCodeSemanticAction(ForLoop *forLoop, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (forLoop == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = FOR_ST;
 	code->forLoop = forLoop;
@@ -478,6 +526,9 @@ Code *ForCodeSemanticAction(ForLoop *forLoop, Code *next) {
 
 Code *DeclarationCodeSemanticAction(Declaration *declaration, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (declaration == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = DECLARATION_ST;
 	code->declaration = declaration;
@@ -487,6 +538,9 @@ Code *DeclarationCodeSemanticAction(Declaration *declaration, Code *next) {
 
 Code *TypeDeclarationCodeSemanticAction(TypeDeclaration *typeDeclaration, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (typeDeclaration == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = TYPE_DECLARATION_ST;
 	code->typeDeclaration = typeDeclaration;
@@ -496,6 +550,9 @@ Code *TypeDeclarationCodeSemanticAction(TypeDeclaration *typeDeclaration, Code *
 
 Code *FunctionCallCodeSemanticAction(FunctionCall *functionCall, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (functionCall == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = FUNCTIONCALL_ST;
 	code->functionCall = functionCall;
@@ -505,6 +562,9 @@ Code *FunctionCallCodeSemanticAction(FunctionCall *functionCall, Code *next) {
 
 Code *FunctionDeclarationCodeSemanticAction(FunctionDeclaration *functionDeclaration, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (functionDeclaration == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = FUNCTION_DECLARATION_ST;
 	code->FunctionDeclaration = functionDeclaration;
@@ -514,6 +574,9 @@ Code *FunctionDeclarationCodeSemanticAction(FunctionDeclaration *functionDeclara
 
 Code *ArrowFunctionCodeSemanticAction(ArrowFunction *arrowFunction, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (arrowFunction == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = ARROW_FUNCTION_ST;
 	code->arrowFunction = arrowFunction;
@@ -523,6 +586,9 @@ Code *ArrowFunctionCodeSemanticAction(ArrowFunction *arrowFunction, Code *next) 
 
 Code *AsyncFunctionCodeSemanticAction(AsyncFunction *asyncFunction, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (asyncFunction == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = ASYNC_FUNCTION_ST;
 	code->asyncFunction = asyncFunction;
@@ -532,6 +598,9 @@ Code *AsyncFunctionCodeSemanticAction(AsyncFunction *asyncFunction, Code *next) 
 
 Code *WhileCodeSemanticAction(WhileLoop *whileLoop, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (whileLoop == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = WHILE_ST;
 	code->whileLoop = whileLoop;
@@ -541,6 +610,9 @@ Code *WhileCodeSemanticAction(WhileLoop *whileLoop, Code *next) {
 
 Code *ExpressionCodeSemanticAction(Expression *expression, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (expression == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = EXPRESSION_ST;
 	code->expression = expression;
@@ -550,6 +622,9 @@ Code *ExpressionCodeSemanticAction(Expression *expression, Code *next) {
 
 Code *IncDecCodeSemanticAction(IncDec *incDec, Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (incDec == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = INC_DEC_ST;
 	code->incDec = incDec;
@@ -559,8 +634,23 @@ Code *IncDecCodeSemanticAction(IncDec *incDec, Code *next) {
 
 Code *ReturnCodeSemanticAction(Code *next) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (next == NULL) {
+		return NULL;
+	}
 	Code *code = malloc(sizeof(Code));
 	code->statement = RETURN_ST;
+	code->next = next;
+	return code;
+}
+
+Code *AssignCodeSemanticAction(Assign *assign, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (assign == NULL) {
+		return NULL;
+	}
+	Code *code = malloc(sizeof(Code));
+	code->statement = ASSIGN_ST;
+	code->assign = assign;
 	code->next = next;
 	return code;
 }
