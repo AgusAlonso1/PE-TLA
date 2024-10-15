@@ -391,6 +391,23 @@ IfStatement *IfSemanticAction(Expression *expression, Code *statement, Code *els
 	ifStatement->elseBody = elseStatement;
 	return ifStatement;
 }
+
+SwitchContent *SwitchContentSemanticAction(Expression *expression, Code *body, SwitchContent *next){
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	SwitchContent *switchContent = malloc(sizeof(SwitchContent));
+	switchContent->condition = expression;
+	switchContent->body = body;
+	switchContent->next = next;
+	return switchContent;
+}
+
+SwitchStatement *SwitchSemanticAction(char *id, SwitchContent *switchContent){
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	SwitchStatement *switchStatement = malloc(sizeof(SwitchStatement));
+	switchStatement->id = id;
+	switchStatement->content = switchContent;
+	return switchStatement;
+}
 // VER
 // ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expression *update, VariableList *iterable, ForLoopType type) {
 // 	_logSyntacticAnalyzerAction(__FUNCTION__);
@@ -651,6 +668,18 @@ Code *AssignCodeSemanticAction(Assign *assign, Code *next) {
 	Code *code = malloc(sizeof(Code));
 	code->statement = ASSIGN_ST;
 	code->assign = assign;
+	code->next = next;
+	return code;
+}
+
+Code *SwitchCodeSemanticAction(SwitchStatement *switchStatement, Code *next) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (switchStatement == NULL) {
+		return NULL;
+	}
+	Code *code = malloc(sizeof(Code));
+	code->statement = SWITCH_ST;
+	code->switchStatement = switchStatement;
 	code->next = next;
 	return code;
 }

@@ -1,0 +1,7 @@
+enum n{a,b,c}
+switch(n) {
+	case a: return 1
+	case b: return 2
+	case c: return 3
+	default: return 4
+}

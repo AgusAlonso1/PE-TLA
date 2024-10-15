@@ -50,6 +50,8 @@ typedef struct VariableTypeList VariableTypeList;
 typedef struct ParamsFor ParamsFor;
 typedef struct ForLoop ForLoop;
 typedef struct IfStatement IfStatement;
+typedef struct SwitchContent SwitchContent;
+typedef struct SwitchStatement SwitchStatement;
 typedef struct WhileLoop WhileLoop;
 
 typedef struct Interface Interface;
@@ -115,7 +117,8 @@ enum StatementType {
 	TYPE_DECLARATION_ST,
 	INC_DEC_ST,
 	RETURN_ST,
-	ASSIGN_ST
+	ASSIGN_ST,
+	SWITCH_ST
 };
 
 enum DataType {
@@ -321,6 +324,17 @@ struct IfStatement {
 	Code *elseBody; // ELSE code
 };
 
+struct SwitchContent {
+	Expression *condition;
+	Code *body;
+	SwitchContent *next;
+};
+
+struct SwitchStatement {
+	char *id;
+	SwitchContent *content;
+};
+
 struct WhileLoop {
 	Expression *condition;
 	Code *body;
@@ -362,6 +376,7 @@ struct Code {
 		TypeDeclaration *typeDeclaration;
 		IncDec *incDec;
 		Assign *assign;
+		SwitchStatement *switchStatement;
 	};
 	struct Code *next;
 };

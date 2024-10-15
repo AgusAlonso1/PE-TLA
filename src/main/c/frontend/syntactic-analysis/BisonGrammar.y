@@ -38,6 +38,8 @@
 	ParamsFor * paramsFor;
 	ForLoop * forLoop;
 	IfStatement *ifStatement;
+	SwitchContent * switchContent;
+	SwitchStatement * switchStatement;
 	WhileLoop * whileLoop;
 	PromiseReturnType * promiseReturnType;
 	FunctionDeclaration * functionDeclaration; 
@@ -94,6 +96,10 @@
 %token <token> ELSE
 %token <token> OF
 %token <token> RETURN
+%token <token> SWITCH
+%token <token> CASE
+%token <token> BREAK
+%token <token> DEFAULT
 
 %token <token> LET
 %token <token> CONST
@@ -171,6 +177,8 @@
 //%type <await> await
 
 %type <ifStatement> ifStatement
+%type <switchContent> switchContent
+%type <switchStatement> switchStatement
 /* %type <iterableVariable> iterableVariable
 %type <paramsFor> paramsFor
 %type <forLoop> forLoop */
@@ -190,11 +198,12 @@
  *
  * @see https://www.gnu.org/software/bison/manual/html_node/Precedence.html
  */
-%left ADD SUB
-%left MUL DIV
-%left GREATER LESS EQUAL NEQUAL STRICT_EQUAL STRICT_NEQUAL LESS_EQUAL GREATER_EQUAL
-%left OR AND NOT
-%left INCREMENT DECREMENT
+%left ADD SUB          // + and -
+%left MUL DIV          // * and /
+%nonassoc GREATER LESS EQUAL NEQUAL STRICT_EQUAL STRICT_NEQUAL GREATER_EQUAL LESS_EQUAL // Comparison operators
+%left OR               // ||
+%left AND              // &&
+%nonassoc INCREMENT DECREMENT // Increment and Decrement (both prefix and postfix)
 
 %%
 
@@ -277,7 +286,7 @@ constant: INT_VALUE																															{ $$ = IntConstantSemanticActi
 	| BOOL_VALUE																															{ $$ = BooleanConstantSemanticAction($1); }
 	;
 	
-arrayContent: expression COMA arrayContent 																								{ $$ = ArrayContentSemanticAction($1, $3); }
+arrayContent: expression COMA arrayContent 																									{ $$ = ArrayContentSemanticAction($1, $3); }
 	| expression 																															{ $$ = ArrayContentSemanticAction($1, NULL); }
 	| %empty																																{ $$ = NULL; }
 	;
@@ -337,6 +346,13 @@ argumentList: expression																													{ $$ = ArgumentListSemantic
 // if -----------------------------------------------------------------------------------------------------------------
 ifStatement: IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE 													{ $$ = IfSemanticAction($3, $6, NULL); }
 	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE ELSE OPEN_BRACE code CLOSE_BRACE 						{ $$ = IfSemanticAction($3, $6, $10); }
+	;
+
+switchContent: 
+    CASE expression COLON code BREAK switchContent                                                                                          { $$ = SwitchContentSemanticAction($2, $4, $5); }
+    | DEFAULT COLON code                                                                                                                	{ $$ = SwitchContentSemanticAction(NULL, $3, NULL); }
+    ;
+switchStatement: SWITCH OPEN_PARENTHESIS ID CLOSE_PARENTHESIS OPEN_BRACE switchContent CLOSE_BRACE                                  		{ $$ = SwitchStatementSemanticAction($3, $6); }
 	;
 
 //for -----------------------------------------------------------------------------------------------------------------

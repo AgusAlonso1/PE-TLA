@@ -61,6 +61,8 @@ TypeDeclaration *EnumTypeDeclarationSemanticAction(char *id, ArgumentList *enumm
 TypeDeclaration *InterfaceTypeDeclarationSemanticAction(char *id, VariableTypeList *interface);
 
 IfStatement *IfSemanticAction(Expression *expression, Code *statement, Code *elseStatement);
+SwitchContent *SwitchContentSemanticAction(Expression *expression, Code *body, SwitchContent *next);
+SwitchStatement *SwitchSemanticAction(char *id, SwitchContent *switchContent);
 ParamsFor *ForSemanticAction(Declaration *init, Expression *condition, Expression *update, VariableList *iterable, ForLoopType type);
 ForLoop *ForLoopSemanticAction(ParamsFor *params, Code *code);
 WhileLoop *WhileSemanticAction(Expression *condition, Code *code);
@@ -85,6 +87,7 @@ Code *ExpressionCodeSemanticAction(Expression *expression, Code *next);
 Code *IncDecCodeSemanticAction(IncDec *incDec, Code *next);
 Code *ReturnCodeSemanticAction(Code *next);
 Code *AssignCodeSemanticAction(Assign *assign, Code *next);
+Code *SwitchCodeSemanticAction(SwitchStatement *switchStatement, Code *next);
 
 Assign *AssignExpressionSemanticAction(char *id, Expression *expression);
 Assign *AssignArraySemanticAction(char *id, ArrayContent *arrayContent);
