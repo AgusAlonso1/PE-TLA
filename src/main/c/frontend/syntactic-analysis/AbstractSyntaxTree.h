@@ -44,7 +44,6 @@ typedef struct VariableType VariableType;
 typedef struct Declaration Declaration;
 
 typedef struct ArgumentList ArgumentList;
-typedef struct VariableList VariableList;
 typedef struct VariableTypeList VariableTypeList;
 
 typedef struct ParamsFor ParamsFor;
@@ -59,11 +58,14 @@ typedef struct Enum Enum;
 
 typedef struct PromiseReturnType PromiseReturnType;
 
+typedef struct FunctionBody FunctionBody;
+
 typedef struct FunctionCall FunctionCall;
 typedef struct FunctionDeclaration FunctionDeclaration;
 typedef struct ArrowFunction ArrowFunction;
 typedef struct AsyncFunction AsyncFunction;
 
+typedef struct Statement Statement;
 typedef struct Code Code;
 typedef struct Program Program;
 /**
@@ -156,6 +158,18 @@ enum IncDecType {
 enum IncDecPosition {
 	PREFIX,
 	POSTFIX
+};
+
+enum IterableType {
+	VARIABLE_IT,
+	FUNCTIONCALL_IT,
+	ARRAY_IT,
+	OBJECT_IT
+};
+
+enum ForLoopType {
+	FOR_CLASSIC,
+	FOR_OF
 };
 
 struct Type {
@@ -262,11 +276,6 @@ struct VariableTypeList {
 	VariableTypeList *next;
 };
 
-struct VariableList {
-	Variable *variable;
-	VariableList *next;
-};
-
 struct await {
 	Expression *expression;
 };
@@ -282,34 +291,31 @@ struct ObjectContent {
 	ObjectContent *next;
 };
 
-// struct IterableVariable {
-// 	union {
-// 		ArrayContent *arrayContent;
-//      ObjectContent *objectContent;
-//      char *variableName;
-//      FunctionCall *functionCall;
-// 	};
-// 	IterableType type;
-// };
-
-enum ForLoopType {
-	FOR_CLASSIC,
-	FOR_OF
+struct IterableVariable {
+	union {
+     	char *variableName; // should be an array or object variable
+     	FunctionCall *functionCall;
+		ArrayContent *arrayContent;
+		ObjectContent *objectContent;
+	};
+	IterableType type;
 };
 
 struct ParamsFor {
 	ForLoopType type;
-
 	union {
 		struct {				   // For classic
-			Declaration *init;	   // Initialization
-			Expression *condition; // condition
-			Expression *update;	   // Update expression
-		} forClassic;
+			Declaration *init;	   
+			Expression *condition; 
+			union{
+				Expression *update; 
+				IncDec *updateIncDec;
+			};   
+		};
 		struct {				  // for...of
-			Declaration *value;	  // value
-			Expression *iterable; // Iterable object
-		} forOf;
+			Declaration *value;	  
+			IterableVariable *iterable; 
+		};
 	};
 };
 
@@ -320,8 +326,8 @@ struct ForLoop {
 
 struct IfStatement {
 	Expression *condition;
-	Code *thenBody; // THEN code
-	Code *elseBody; // ELSE code
+	Code *thenBody;
+	Code *elseBody;
 };
 
 struct SwitchContent {
@@ -340,27 +346,32 @@ struct WhileLoop {
 	Code *body;
 };
 
+struct FunctionBody {
+	Code *code;
+	Expression *returnValue;
+};
+
 struct FunctionDeclaration {
 	char *id;
-	VariableList *arguments;
+	VariableTypeList *arguments;
 	Type *returnType;
-	Code *body;
+	FunctionBody *body;
 };
 
 struct ArrowFunction {
-	VariableList *arguments;
+	VariableTypeList *arguments;
 	Type *returnType;
-	Code *body;
+	FunctionBody *body;
 };
 
 struct AsyncFunction {
 	char *id;
 	VariableTypeList *arguments;
 	PromiseReturnType *promiseReturnType;
-	Code *body;
+	FunctionBody *body;
 };
 
-struct Code {
+struct Statement {
 	StatementType statement;
 	union {
 		IfStatement *ifStatement;
@@ -378,6 +389,10 @@ struct Code {
 		Assign *assign;
 		SwitchStatement *switchStatement;
 	};
+};
+
+struct Code {
+	Statement *statement;
 	struct Code *next;
 };
 
@@ -396,7 +411,6 @@ struct Program {
 // void releaseVariableType(VariableType *variableType);
 // void releaseVariableName(char *variableName);
 // void releaseVariableTypeList(VariableTypeList *variableTypeList);
-// void releaseVariableList(VariableList *variableList);
 // void releaseArgumentList(ArgumentList *argumentList);
 
 // void releaseEnum(Enum *enumm);

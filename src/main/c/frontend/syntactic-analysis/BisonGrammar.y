@@ -19,36 +19,37 @@
 	Token token;
 
 	/** Non-terminals */
-	Declaration * declaration; 
+	Program * program;
+	Code * code;
+	Statement * statement;
+	Declaration * declaration;
 	TypeDeclaration * typeDeclaration;
 	Type * type;
 	VariableType * variableType;
 	Constant * constant;
 	ArrayContent * arrayContent;
 	ObjectContent * objectContent;
-	VariableList * variableList;
 	VariableTypeList * variableTypeList;
 	ArgumentList * argumentList;
-	Assign * assign;
+	IterableVariable * iterableVariable;
 	Variable * variable;
 	Expression * expression;
 	IncDec * incDec;
 	Factor * factor;
-	IterableVariable * iterableVariable;
+	IfStatement *ifStatement;
+	WhileLoop * whileLoop;
 	ParamsFor * paramsFor;
 	ForLoop * forLoop;
-	IfStatement *ifStatement;
 	SwitchContent * switchContent;
 	SwitchStatement * switchStatement;
-	WhileLoop * whileLoop;
 	PromiseReturnType * promiseReturnType;
+	FunctionBody * functionBody;
 	FunctionDeclaration * functionDeclaration; 
 	ArrowFunction * arrowFunction;
 	AsyncFunction * asyncFunction;
 	//Await * await;
 	FunctionCall * functionCall;
-	Code * code;
-	Program * program;
+
 }
 
 /**
@@ -67,7 +68,6 @@
 %destructor { releaseVariable($$); } <variable>
 %destructor { releaseVariableType($$); } <variableType>
 %destructor { releaseVariableName($$); } <variableName>
-%destructor { releaseVariableTypeList($$); } <variableList>
 %destructor { releaseVariableValueList($$); } <variableValue>
 
 %destructor { releaseDeclaration($$); } <declaration>
@@ -154,56 +154,62 @@
 
 
 /** Non-terminals. */
-%type <declaration> declaration
-%type <typeDeclaration> typeDeclaration
-%type <type> type
+%type <program> program
+%type <code> code
+%type <statement> statement
 
+%type <incDec> incDec
+%type <expression> expression
+%type <factor> factor
+
+%type <type> type
 %type <variableType> variableType
 %type <constant> constant
 %type <arrayContent> arrayContent
 %type <objectContent> objectContent
 
-%type <argumentList> argumentList
-%type <variableList> variableList
-%type <variableTypeList> variableTypeList
-%type <assign> assign
-
-
+%type <declaration> declaration
+%type <typeDeclaration> typeDeclaration
 %type <variable> variable
-%type <incDec> incDec
-%type <expression> expression
-
-%type <promiseReturnType> promiseReturnType
-//%type <await> await
+%type <variableTypeList> variableTypeList
+%type <argumentList> argumentList
+%type <iterableVariable> iterableVariable
 
 %type <ifStatement> ifStatement
+%type <whileLoop> whileLoop
+%type <paramsFor> paramsFor
+%type <forLoop> forLoop
 %type <switchContent> switchContent
 %type <switchStatement> switchStatement
-/* %type <iterableVariable> iterableVariable
-%type <paramsFor> paramsFor
-%type <forLoop> forLoop */
-%type <whileLoop> whileLoop
 
+//%type <await> await
+%type <promiseReturnType> promiseReturnType
+
+%type <functionBody> functionBody
 %type <functionDeclaration> functionDeclaration
-%type <arrowFunction> arrowFunction
-%type <asyncFunction> asyncFunction
 %type <functionCall> functionCall
-
-%type <factor> factor
-%type <program> program
-%type <code> code
+%type <asyncFunction> asyncFunction
+%type <arrowFunction> arrowFunction
 
 /**
  * Precedence and associativity.
  *
  * @see https://www.gnu.org/software/bison/manual/html_node/Precedence.html
  */
-%left ADD SUB          // + and -
-%left MUL DIV          // * and /
-%nonassoc GREATER LESS EQUAL NEQUAL STRICT_EQUAL STRICT_NEQUAL GREATER_EQUAL LESS_EQUAL // Comparison operators
-%left OR               // ||
-%left AND              // &&
-%nonassoc INCREMENT DECREMENT // Increment and Decrement (both prefix and postfix)
+%nonassoc IF
+%nonassoc ELSE
+%nonassoc CLOSE_BRACE
+%nonassoc OPEN_PARENTHESIS
+
+%left ADD SUB
+%left MUL DIV
+%left INCREMENT DECREMENT
+%left GREATER LESS NEQUAL STRICT_EQUAL STRICT_NEQUAL LESS_EQUAL GREATER_EQUAL EQUAL
+%left AND 
+%left OR
+%right NOT
+%right ASSIGN
+
 
 %%
 
@@ -213,34 +219,31 @@ program: code 																																{ $$ = CodeProgramSemanticAction(c
 	;
 
 // Code -----------------------------------------------------------------------------------------------------------------
-code: ifStatement code 																		 												{ $$ = IfCodeSemanticAction($1, $2); }
-	//| forLoop code 																		 													{ $$ = ForCodeSemanticAction($1, $2); }
-	| whileLoop code 																	 													{ $$ = WhileCodeSemanticAction($1, $2); }
-	| declaration code															 	 														{ $$ = DeclarationCodeSemanticAction($1, $2); }
-	| typeDeclaration code 																     												{ $$ = TypeDeclarationCodeSemanticAction($1, $2); }
-	| functionCall code 															 														{ $$ = FunctionCallCodeSemanticAction($1, $2); }
-	| functionDeclaration code 																 												{ $$ = FunctionDeclarationCodeSemanticAction($1, $2); }
-	| arrowFunction code 															 														{ $$ = ArrowFunctionCodeSemanticAction($1, $2); }
-	| asyncFunction code 															 														{ $$ = AsyncFunctionCodeSemanticAction($1, $2); }
-	| expression code 															 															{ $$ = ExpressionCodeSemanticAction($1, $2); }
-	| incDec code 																															{ $$ = IncDecCodeSemanticAction($1, $2); }
-	| RETURN code 																															{ $$ = ReturnCodeSemanticAction($2); }
-	| assign code  																															{ $$ = AssignCodeSemanticAction($1, $2); }
-	| %empty																																{ $$ = NULL; }
+code: statement 																															{ $$ = CodeSemanticAction($1, NULL); }
+	| statement code																														{ $$ = CodeSemanticAction($1, $2); }
+	;
+
+statement: declaration 															 	 													{ $$ = DeclarationStatementSemanticAction($1); }
+	| typeDeclaration  																     												{ $$ = TypeDeclarationStatementSemanticAction($1); }
+	| ifStatement  																														{ $$ = IfStatementSemanticAction($1); }
+	| whileLoop  																														{ $$ = WhileStatementSemanticAction($1); }
+	| forLoop  																															{ $$ = ForStatementSemanticAction($1); }
+	| switchStatement  																													{ $$ = SwitchStatementSemanticAction($1); }
+	| functionDeclaration  																												{ $$ = FunctionDeclarationStatementSemanticAction($1); }
+	| functionCall																														{ $$ = FunctionCallStatementSemanticAction($1); }
+	| asyncFunction  																													{ $$ = AsyncFunctionStatementSemanticAction($1); }
+	| arrowFunction  																													{ $$ = ArrowFunctionStatementSemanticAction($1); }
+	| variable																															{ $$ = VariableStatementSemanticAction($1); }
 	;
 
 // Expression -----------------------------------------------------------------------------------------------------------------
-incDec: expression INCREMENT 																											{ $$ = 	IncDecSemanticAction($1,INC_OP, POSTFIX); }
-	| expression DECREMENT 																												{ $$ = 	IncDecSemanticAction($1,DEC_OP, POSTFIX); }
-	| OPEN_PARENTHESIS expression CLOSE_PARENTHESIS INCREMENT 																				{ $$ = 	IncDecSemanticAction($2,INC_OP, POSTFIX); }
-	| OPEN_PARENTHESIS expression CLOSE_PARENTHESIS DECREMENT 																				{ $$ = 	IncDecSemanticAction($2,DEC_OP, POSTFIX); }
-	| INCREMENT expression 																												{ $$ =  IncDecSemanticAction($2,INC_OP, PREFIX); }
-	| DECREMENT expression 																												{ $$ =  IncDecSemanticAction($2,DEC_OP, PREFIX); }
-	| INCREMENT OPEN_PARENTHESIS expression CLOSE_PARENTHESIS																				{ $$ =  IncDecSemanticAction($3,INC_OP, PREFIX); }
-	| DECREMENT OPEN_PARENTHESIS expression CLOSE_PARENTHESIS																				{ $$ =  IncDecSemanticAction($3,DEC_OP, PREFIX); }
-	;
+incDec: INCREMENT expression																											{ $$ = IncDecSemanticAction($2, INC_OP, PREFIX); }
+    | DECREMENT expression																												{ $$ = IncDecSemanticAction($2, DEC_OP, PREFIX); }
+	| expression INCREMENT																												{ $$ = IncDecSemanticAction($1, INC_OP, POSTFIX); }
+	| expression DECREMENT																												{ $$ = IncDecSemanticAction($1, DEC_OP, POSTFIX); }
+    ;
 
-expression: expression[left] ADD expression[right]																						{ $$ = ExpressionSemanticAction($left, $right, ADD_OP); } 
+expression: expression[left] ADD expression[right] 																						{ $$ = ExpressionSemanticAction($left, $right, ADD_OP); }
 	| expression[left] SUB expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, SUB_OP); }
 	| expression[left] MUL expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, MUL_OP); }
 	| expression[left] DIV expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, DIV_OP); }
@@ -254,26 +257,20 @@ expression: expression[left] ADD expression[right]																						{ $$ = E
 	| expression[left] GREATER_EQUAL expression[right] 																					{ $$ = ExpressionSemanticAction($left, $right, GREATER_EQUAL_OP); }
 	| expression[left] OR expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, OR_OP); }
 	| expression[left] AND expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, AND_OP); }
-	| NOT expression 																													{ $$ = ExpressionSemanticAction($2, NULL, NOT_OP);}
+	| NOT expression 																													{ $$ = ExpressionSemanticAction($2, NULL, NOT_OP); }
 	| factor																															{ $$ = FactorExpressionSemanticAction($1); }
 	;
 
 factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS																					{ $$ = ExpressionFactorSemanticAction($2); }
 	| ID																													    		{ $$ = VariableFactorSemanticAction($1); }
 	| constant 																															{ $$ = ConstantFactorSemanticAction($1); }
-	| functionCall 																														{ $$ = FunctionCallFactorSemanticAction($1); }
-	;
-
-assign: ID ASSIGN expression																											{ $$ = AssignExpressionSemanticAction($1, $3); }
-	| ID ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																					{ $$ = AssignArraySemanticAction($1, $4); }
-	| ID ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																					{ $$ = AssignObjectSemanticAction($1, $4); }
 	;
 
 // Type -------------------------------------------------------------------------------------------------------------------------------------------------
 type: SINGLE_TYPE																    														{ $$ = SingleTypeSemanticAction($1, NULL); }
 	| SINGLE_TYPE PIPE type																													{ $$ = SingleTypeSemanticAction($1, $3); }
 	| SINGLE_TYPE OPEN_BRACKET CLOSE_BRACKET 																								{ $$ = ArrayTypeSemanticAction($1); }
-	| SINGLE_TYPE OPEN_BRACE CLOSE_BRACE PIPE type																							{ $$ = SingleTypeSemanticAction($1, $5); }
+	| SINGLE_TYPE OPEN_BRACKET CLOSE_BRACKET PIPE type																							{ $$ = SingleTypeSemanticAction($1, $5); }
 	;
 
 variableType: ID COLON type																													{ $$ = VariableTypeSemanticAction($1, $3); }
@@ -295,10 +292,6 @@ objectContent: ID COLON expression 																											{ $$ = ObjectConte
 	| ID COLON expression COMA objectContent 																								{ $$ = ObjectContentSemanticAction($1, $3, $5); }
 	;
 
-promiseReturnType: PROMISE GREATER type LESS																								{ $$ = PromiseReturnTypeSemanticAction($3); }
-	| %empty																																{ $$ = PromiseReturnTypeSemanticAction(NULL); }
-	;
-
 // Variable declaration and assignment -----------------------------------------------------------------------------------------------------------------
 declaration: LET variableType ASSIGN expression																								{ $$ = DeclarationSemanticAction(LET_DT, $2, $4); }
 	| LET variableType																														{ $$ = DeclarationSemanticAction(LET_DT, $2, NULL); }
@@ -309,7 +302,6 @@ declaration: LET variableType ASSIGN expression																								{ $$ = De
 	| VAR variableType ASSIGN expression																									{ $$ = DeclarationSemanticAction(VAR_DT, $2, $4); }
 	| VAR variableType																														{ $$ = DeclarationSemanticAction(VAR_DT, $2, NULL); }
 	| VAR variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(VAR_DT, $2, $5); }
-//	| declaration COMA variableType													{ } // VER
 	;
 
 typeDeclaration: TYPE ID ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																		{ $$ = ObjectTypeDeclarationSemanticAction($2, $5); }
@@ -324,11 +316,6 @@ variable: variableType ASSIGN expression																									{ $$ = Variable
 	| variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																				{ $$ = VariableObjectSemanticAction($1, $4); }
 	;
 
-variableList: variable																														{ $$ = VariableListSemanticAction($1, NULL); }
-	| variable COMA variableList  																											{ $$ = VariableListSemanticAction($1, $3); }
-	| %empty																																{ $$ = NULL; }
-	;
-
 variableTypeList: variableType																												{ $$ = VariableTypeListSemanticAction($1, NULL); }
 	| variableType COMA variableTypeList																									{ $$ = VariableTypeListSemanticAction($1, $3); }
 	| %empty																																{ $$ = NULL; }
@@ -339,50 +326,66 @@ argumentList: expression																													{ $$ = ArgumentListSemantic
 	| %empty																																{ $$ = NULL; }
 	;
 
-/* iterableVariable: ID  																														{ $$ = IterableVariableSemanticAction($1); }
-	| functionCall 																															{ $$ = IterableVariableSemanticAction($1); }
-	;  */
-
-// if -----------------------------------------------------------------------------------------------------------------
-ifStatement: IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE 													{ $$ = IfSemanticAction($3, $6, NULL); }
-	| IF OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE ELSE OPEN_BRACE code CLOSE_BRACE 						{ $$ = IfSemanticAction($3, $6, $10); }
+iterableVariable: ID																														{ $$ = IterableVariableNameSemanticAction($1); }
+	| OPEN_BRACKET arrayContent	CLOSE_BRACKET																								{ $$ = IterableVariableArraySemanticAction($2); }
+	| OPEN_BRACE objectContent	CLOSE_BRACE																									{ $$ = IterableVariableObjectContentSemanticAction($2); }
+	| functionCall																															{ $$ = IterableVariableFunctionCallSemanticAction($1); }
 	;
 
-switchContent: 
-    CASE expression COLON code BREAK switchContent                                                                                          { $$ = SwitchContentSemanticAction($2, $4, $5); }
-    | DEFAULT COLON code                                                                                                                	{ $$ = SwitchContentSemanticAction(NULL, $3, NULL); }
-    ;
-switchStatement: SWITCH OPEN_PARENTHESIS ID CLOSE_PARENTHESIS OPEN_BRACE switchContent CLOSE_BRACE                                  		{ $$ = SwitchStatementSemanticAction($3, $6); }
+// Control structures -----------------------------------------------------------------------------------------------------------------
+ifStatement: 
+	IF OPEN_PARENTHESIS expression[condition] CLOSE_PARENTHESIS OPEN_BRACE code[then] CLOSE_BRACE ELSE OPEN_BRACE code[else] %prec CLOSE_BRACE CLOSE_BRACE				{ $$ = IfSemanticAction($condition, $then, $else); }
+	| IF OPEN_PARENTHESIS expression[condition] CLOSE_PARENTHESIS OPEN_BRACE code[then] CLOSE_BRACE																		{ $$ = IfSemanticAction($condition, $then, NULL); }
 	;
 
-//for -----------------------------------------------------------------------------------------------------------------
-/* paramsFor: OPEN_PARENTHESIS declaration SEMI_COLON expression SEMI_COLON expression CLOSE_PARENTHESIS 											{ $$ = ParamsForSemanticAction($2, $4, $6, FOR_CLASSIC); }
-	| OPEN_PARENTHESIS declaration OF iterableVariable CLOSE_PARENTHESIS 																	{ $$ = ParamsForSemanticAction($2, $5, NULL, FOR_OF); }
+whileLoop: WHILE OPEN_PARENTHESIS expression[condition] CLOSE_PARENTHESIS OPEN_BRACE code[body] CLOSE_BRACE 								{ $$ = WhileSemanticAction($condition, $body); }
 	;
 
-forLoop: FOR paramsFor OPEN_BRACE code CLOSE_BRACE 																							{ $$ = ForSemanticAction($2, $4); }
-	; */
-
-//while -----------------------------------------------------------------------------------------------------------------
-whileLoop: WHILE OPEN_PARENTHESIS expression CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE 													{ $$ = WhileSemanticAction($3, $6); }
+paramsFor: declaration SEMI_COLON expression SEMI_COLON incDec 																			{ $$ = ForParamsIncDecSemanticAction($1, $3, $5); }
+	| declaration SEMI_COLON expression SEMI_COLON expression 																			{ $$ = ForParamsSemanticAction($1, $3, $5); }
+	| declaration SEMI_COLON expression SEMI_COLON 																						{ $$ = ForParamsSemanticAction($1, $3, NULL); }
+	| SEMI_COLON expression SEMI_COLON incDec 																							{ $$ = ForParamsIncDecSemanticAction(NULL, $2, $4); }
+	| SEMI_COLON expression SEMI_COLON expression 																						{ $$ = ForParamsSemanticAction(NULL, $2, $4); }
+	| SEMI_COLON expression SEMI_COLON 																									{ $$ = ForParamsSemanticAction(NULL, $2, NULL); }
+	| declaration OF iterableVariable 																									{ $$ = ForOfParamsSemanticAction($1, $3); }
 	;
 
-// await -----
-//await: AWAIT expression 																													{ $$ = AwaitSemanticAction($2); }
+forLoop: FOR OPEN_PARENTHESIS paramsFor CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE 													{ $$ = ForSemanticAction($3, $6); }
+	;
+
+switchContent: CASE expression[cond] COLON code[body] BREAK switchContent[next] 														{ $$ = SwitchContentSemanticAction($cond, $body, $next); }
+	| DEFAULT COLON code[body] 																											{ $$ = SwitchContentSemanticAction(NULL, $body, NULL); }
+	| %empty																															{ $$ = NULL; }
+	;
+
+switchStatement: SWITCH OPEN_PARENTHESIS ID[id] CLOSE_PARENTHESIS OPEN_BRACE switchContent[body] CLOSE_BRACE 							{ $$ = SwitchSemanticAction($id, $body); }
+	;
+
+// aync await -----------------------------------------------------------------------------------------------------------------
+//await: AWAIT expression																													{ $$ = AwaitSemanticAction($2); }
 //	;
-
-// function -----------------------------------------------------------------------------------------------------------------
-functionCall: ID OPEN_PARENTHESIS argumentList CLOSE_PARENTHESIS 																			{ $$ = FunctionCallSemanticAction($1,$3); }
+promiseReturnType: COLON PROMISE OPEN_PARENTHESIS type CLOSE_PARENTHESIS																	{ $$ = PromiseReturnTypeSemanticAction($4); }
+	| %empty																																{ $$ = NULL; }
+	;
+// Functions -----------------------------------------------------------------------------------------------------------------
+functionBody: code RETURN expression																										{ $$ = FunctionBodySemanticAction($1, $3); }
+	| code																																	{ $$ = FunctionBodySemanticAction($1, NULL); }
+	| RETURN expression																														{ $$ = FunctionBodySemanticAction(NULL, $2); }
 	;
 
-functionDeclaration: FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS COLON type OPEN_BRACE code CLOSE_BRACE 					{ $$ = FunctionDeclarationSemanticAction($2,$4,$7,$9); }
-	| FUNCTION ID OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS OPEN_BRACE code CLOSE_BRACE 												{ $$ = FunctionDeclarationSemanticAction($2,$4,NULL,$7); }
+functionDeclaration: FUNCTION ID[id] OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 									{ $$ = FunctionDeclarationSemanticAction($id, $arg, NULL, $body); }
+	| FUNCTION ID[id] OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS COLON type[return] OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 								{ $$ = FunctionDeclarationSemanticAction($id, $arg, $return, $body); }
 	;
 
-arrowFunction: OPEN_PARENTHESIS variableList CLOSE_PARENTHESIS ARROW COLON type OPEN_BRACE code CLOSE_BRACE 							{ $$ = ArrowFunctionSemanticAction($2,$6,$8); }
+functionCall: ID[id] OPEN_PARENTHESIS argumentList[arg] CLOSE_PARENTHESIS																												{ $$ = FunctionCallSemanticAction($id, $arg); }
 	;
 
-asyncFunction: ASYNC FUNCTION ID OPEN_PARENTHESIS variableTypeList CLOSE_PARENTHESIS COLON promiseReturnType OPEN_BRACE code CLOSE_BRACE 	{ $$ = AsyncFunctionSemanticAction($3,$5,$8,$10); }
+asyncFunction: ASYNC FUNCTION ID[id] OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS promiseReturnType[promise] OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 	{ $$ = AsyncFunctionSemanticAction($id, $arg, $promise, $body); }
 	;
+
+arrowFunction: OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS COLON type[return] ARROW OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 								{ $$ = ArrowFunctionSemanticAction($arg, $return, $body); }
+	| OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS ARROW OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 															{ $$ = ArrowFunctionSemanticAction($arg, NULL, $body); }
+	;
+
 
 %%

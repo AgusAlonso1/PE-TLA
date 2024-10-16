@@ -1,0 +1,21 @@
+let a = 2
+
+if (a > 1) {
+  let b = 2
+  let c = a * b
+}
+
+while(a > 1) {
+  let b = 2
+  let c = a * b
+}
+
+for (let i = 0; i < 10; i++) {
+  let b = 2
+  let c = a * b
+}
+
+for(let a of [1,2,3]) {
+  let b = 2
+  let c = a * b
+}

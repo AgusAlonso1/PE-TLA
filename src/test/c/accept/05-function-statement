@@ -1,0 +1,5 @@
+function fun(a: number) {
+  return a+2
+}
+let b=2
+fun(b)
