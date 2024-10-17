@@ -489,7 +489,7 @@ ArgumentList *ArgumentListSemanticAction(Expression *expression, ArgumentList *n
 	return argList;
 }
 
-FunctionCall *FunctionCallSemanticAction(char *id, ArgumentList *arguments) {
+FunctionCall *FunctionCallSemanticAction(char *id, ArgumentList *arguments, FunctionCallType type) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	if (id == NULL) {
 		return NULL;
@@ -498,10 +498,11 @@ FunctionCall *FunctionCallSemanticAction(char *id, ArgumentList *arguments) {
 	functionCall->id = malloc(strlen(id) + 1);
 	strcpy(functionCall->id, id);
 	functionCall->arguments = arguments;
+	functionCall->type = type;
 	return functionCall;
 }
 
-FunctionBody *FunctionBodySemanticAction(Code *code, Expression *returnValue) {
+FunctionBody *FunctionBodySemanticAction(Code *code, ReturnValue *returnValue) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	if (code == NULL && returnValue == NULL) {
 		return NULL;
@@ -510,6 +511,50 @@ FunctionBody *FunctionBodySemanticAction(Code *code, Expression *returnValue) {
 	functionBody->code = code;
 	functionBody->returnValue = returnValue;
 	return functionBody;
+}
+
+ReturnValue *ReturnExpressionSemanticAction(Expression *expression){
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (expression == NULL) {
+		return NULL;
+	}
+	ReturnValue *returnValue = malloc(sizeof(ReturnValue));
+	returnValue->expression = expression;
+	returnValue->type = EXPRESSION_RT;
+	return returnValue;
+}
+
+ReturnValue *ReturnArrowFunctionSemanticAction(ArrowFunction *arrowFunction){
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (arrowFunction == NULL) {
+		return NULL;
+	}
+	ReturnValue *returnValue = malloc(sizeof(ReturnValue));
+	returnValue->arrowFunction = arrowFunction;
+	returnValue->type = ARROWFUNCTION_RT;
+	return returnValue;
+}
+
+ReturnValue *ReturnFunctionCallSemanticAction(FunctionCall *functionCall){
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (functionCall == NULL) {
+		return NULL;
+	}
+	ReturnValue *returnValue = malloc(sizeof(ReturnValue));
+	returnValue->functionCall = functionCall;
+	returnValue->type = FUNCTIONCALL_RT;
+	return returnValue;
+}
+
+ReturnValue *ReturnAsyncFunctionSemanticAction(AsyncFunction *asyncFunction){
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	if (asyncFunction == NULL) {
+		return NULL;
+	}
+	ReturnValue *returnValue = malloc(sizeof(ReturnValue));
+	returnValue->asyncFunction = asyncFunction;
+	returnValue->type = ASYNC_FUNCTION_RT;
+	return returnValue;
 }
 
 FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableTypeList *arguments, Type *returnType, FunctionBody *body) {

@@ -25,6 +25,8 @@ typedef enum ForLoopType ForLoopType;
 typedef enum IterableType IterableType;
 typedef enum Assign Assign;
 typedef enum UserType UserType;
+typedef enum ReturnType ReturnType;
+typedef enum FunctionCallType FunctionCallType;
 
 typedef struct Type Type;
 typedef struct TypeDeclaration TypeDeclaration;
@@ -58,6 +60,7 @@ typedef struct Enum Enum;
 
 typedef struct PromiseReturnType PromiseReturnType;
 
+typedef struct ReturnValue ReturnValue;
 typedef struct FunctionBody FunctionBody;
 
 typedef struct FunctionCall FunctionCall;
@@ -181,6 +184,19 @@ enum ForLoopType {
 	FOR_OF
 };
 
+enum ReturnType {
+	EXPRESSION_RT,
+	FUNCTIONCALL_RT,
+	ARROWFUNCTION_RT,
+	ASYNC_FUNCTION_RT,
+	VOID_RT
+};
+
+enum FunctionCallType {
+	CLASSIC_CALL,
+	AWAIT_CALL
+};
+
 struct Type {
 	DataType singleType;
 	Type *next;
@@ -211,6 +227,16 @@ struct Variable {
 		ArrowFunction *arrowFunction;
 	};
 	Assign type;
+};
+
+struct ReturnValue {
+	union{
+		Expression *expression;
+		FunctionCall *functionCall;
+		ArrowFunction *arrowFunction;
+		AsyncFunction *asyncFunction;
+	};
+	ReturnType type;
 };
 
 struct PromiseReturnType {
@@ -265,6 +291,7 @@ struct Expression {
 struct FunctionCall {
 	char *id;
 	ArgumentList *arguments;
+	FunctionCallType type;
 };
 
 struct ArgumentList {
@@ -349,7 +376,7 @@ struct WhileLoop {
 
 struct FunctionBody {
 	Code *code;
-	Expression *returnValue;
+	ReturnValue *returnValue;
 };
 
 struct FunctionDeclaration {

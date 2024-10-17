@@ -77,8 +77,14 @@ WhileLoop *WhileSemanticAction(Expression *condition, Code *code);
 Expression *AwaitExpressionSemanticAction(Expression *expression);
 
 ArgumentList *ArgumentListSemanticAction(Expression *expression, ArgumentList *next);
-FunctionCall *FunctionCallSemanticAction(char *id, ArgumentList *arguments);
-FunctionBody *FunctionBodySemanticAction(Code *code, Expression *returnValue);
+FunctionCall *FunctionCallSemanticAction(char *id, ArgumentList *arguments, FunctionCallType type);
+
+ReturnValue *ReturnExpressionSemanticAction(Expression *expression);
+ReturnValue *ReturnArrowFunctionSemanticAction(ArrowFunction *arrowFunction);
+ReturnValue *ReturnFunctionCallSemanticAction(FunctionCall *functionCall);
+ReturnValue *ReturnAsyncFunctionSemanticAction(AsyncFunction *asyncFunction);
+
+FunctionBody *FunctionBodySemanticAction(Code *code, ReturnValue *returnValue);
 FunctionDeclaration *FunctionDeclarationSemanticAction(char *id, VariableTypeList *arguments, Type *returnType, FunctionBody *body);
 ArrowFunction *ArrowFunctionSemanticAction(VariableTypeList *arguments, Type *returnType, FunctionBody *body);
 AsyncFunction *AsyncFunctionSemanticAction(char *id, VariableTypeList *arguments, PromiseReturnType *promiseReturnType, FunctionBody *body);

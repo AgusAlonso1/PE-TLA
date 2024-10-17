@@ -43,6 +43,7 @@
 	SwitchContent * switchContent;
 	SwitchStatement * switchStatement;
 	PromiseReturnType * promiseReturnType;
+	ReturnValue * returnValue;
 	FunctionBody * functionBody;
 	FunctionDeclaration * functionDeclaration; 
 	ArrowFunction * arrowFunction;
@@ -183,6 +184,7 @@
 %type <switchStatement> switchStatement
 
 //%type <await> await
+%type <returnValue> returnValue
 %type <promiseReturnType> promiseReturnType
 
 %type <functionBody> functionBody
@@ -199,7 +201,7 @@
 %nonassoc IF
 %nonassoc ELSE
 %nonassoc CLOSE_BRACE
-%nonassoc OPEN_PARENTHESIS
+%nonassoc OPEN_PARENTHESIS CLOSE_PARENTHESIS
 
 %left ADD SUB
 %left MUL DIV
@@ -208,6 +210,7 @@
 %left AND 
 %left OR
 %right NOT
+%right ARROW
 %right ASSIGN
 
 
@@ -310,8 +313,8 @@ typeDeclaration: TYPE ID ASSIGN OPEN_BRACE objectContent CLOSE_BRACE												
 variable: variableType ASSIGN expression																									{ $$ = VariableExpressionSemanticAction($1, $3); }
 	| variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																			{ $$ = VariableArraySemanticAction($1, $4); }
 	| variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																				{ $$ = VariableObjectSemanticAction($1, $4); }
-	/* | variableType ASSIGN functionCall																										{ $$ = VariableFunctionCallSemanticAction($1,$3); }
-	| variableType ASSIGN arrowFunction																										{ $$ = VariableArrowFunctionSemanticAction($1, $3); } */
+	| variableType ASSIGN arrowFunction	%prec ARROW																							{ $$ = VariableArrowFunctionSemanticAction($1, $3); }
+	| variableType ASSIGN functionCall																										{ $$ = VariableFunctionCallSemanticAction($1,$3); }
 	;
 
 variableTypeList: variableType																												{ $$ = VariableTypeListSemanticAction($1, NULL); }
@@ -359,30 +362,41 @@ switchContent: CASE expression[cond] COLON code[body] BREAK switchContent[next] 
 switchStatement: SWITCH OPEN_PARENTHESIS ID[id] CLOSE_PARENTHESIS OPEN_BRACE switchContent[body] CLOSE_BRACE 							{ $$ = SwitchSemanticAction($id, $body); }
 	;
 
-// aync await -----------------------------------------------------------------------------------------------------------------
-//await: AWAIT expression																													{ $$ = AwaitSemanticAction($2); }
-//	;
+// return type -----------------------------------------------------------------------------------------------------------------
+/* await: AWAIT functionCall																													{ $$ = AwaitSemanticAction($2); }
+	| AWAIT arrowFunction																													{ $$ = AwaitArrowFunctionSemanticAction($2); }
+	| AWAIT asyncFunction																													{ $$ = AwaitAsyncFunctionSemanticAction($2); }
+	; */
+returnValue: RETURN expression 																												{ $$ = ReturnExpressionSemanticAction($2); }
+	| RETURN arrowFunction 																													{ $$ = ReturnArrowFunctionSemanticAction($2); }
+	| RETURN functionCall 																													{ $$ = ReturnFunctionCallSemanticAction($2); }
+	//| RETURN await
+	| RETURN asyncFunction 																													{ $$ = ReturnAsyncFunctionSemanticAction($2); }
+	| RETURN																																{ $$ = NULL; }
+	;
+
 promiseReturnType: COLON PROMISE OPEN_PARENTHESIS type CLOSE_PARENTHESIS																	{ $$ = PromiseReturnTypeSemanticAction($4); }
 	| %empty																																{ $$ = NULL; }
 	;
 // Functions -----------------------------------------------------------------------------------------------------------------
-functionBody: code RETURN expression																										{ $$ = FunctionBodySemanticAction($1, $3); }
+functionBody: code returnValue																												{ $$ = FunctionBodySemanticAction($1, $2); }
 	| code																																	{ $$ = FunctionBodySemanticAction($1, NULL); }
-	| RETURN expression																														{ $$ = FunctionBodySemanticAction(NULL, $2); }
+	| returnValue																															{ $$ = FunctionBodySemanticAction(NULL, $1); }
 	;
 
-functionDeclaration: FUNCTION ID[id] OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 									{ $$ = FunctionDeclarationSemanticAction($id, $arg, NULL, $body); }
-	| FUNCTION ID[id] OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS COLON type[return] OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 								{ $$ = FunctionDeclarationSemanticAction($id, $arg, $return, $body); }
+functionDeclaration: FUNCTION ID[id] OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 								{ $$ = FunctionDeclarationSemanticAction($id, $arg, NULL, $body); }
+	| FUNCTION ID[id] OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS COLON type[return] OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 							{ $$ = FunctionDeclarationSemanticAction($id, $arg, $return, $body); }
 	;
 
-functionCall: ID[id] OPEN_PARENTHESIS argumentList[arg] CLOSE_PARENTHESIS																												{ $$ = FunctionCallSemanticAction($id, $arg); }
+functionCall: ID[id] OPEN_PARENTHESIS argumentList[arg] CLOSE_PARENTHESIS	%prec CLOSE_PARENTHESIS																											{ $$ = FunctionCallSemanticAction($id, $arg, CLASSIC_CALL); }
+	| AWAIT ID[id] OPEN_PARENTHESIS argumentList[arg] CLOSE_PARENTHESIS		%prec CLOSE_PARENTHESIS																											{ $$ = FunctionCallSemanticAction($id, $arg, AWAIT_CALL); }
 	;
 
 asyncFunction: ASYNC FUNCTION ID[id] OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS promiseReturnType[promise] OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 	{ $$ = AsyncFunctionSemanticAction($id, $arg, $promise, $body); }
 	;
 
-arrowFunction: OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS COLON type[return] ARROW OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 								{ $$ = ArrowFunctionSemanticAction($arg, $return, $body); }
-	| OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS ARROW OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 															{ $$ = ArrowFunctionSemanticAction($arg, NULL, $body); }
+arrowFunction: OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS COLON type[return] ARROW OPEN_BRACE functionBody[body] CLOSE_BRACE 	%prec ARROW							{ $$ = ArrowFunctionSemanticAction($arg, $return, $body); }
+	| OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS ARROW OPEN_BRACE functionBody[body] CLOSE_BRACE 	%prec ARROW														{ $$ = ArrowFunctionSemanticAction($arg, NULL, $body); }
 	;
 
 

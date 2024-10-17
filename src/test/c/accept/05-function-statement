@@ -3,3 +3,14 @@ function fun(a: number) {
 }
 let b=2
 fun(b)
+
+
+const asyncFunctionName = async (a: number) => {
+  return a + 2;
+};
+
+async function callAsyncFunction() {
+  const result = await asyncFunctionName(5);
+}
+
+callAsyncFunction();
