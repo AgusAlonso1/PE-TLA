@@ -212,12 +212,21 @@ VariableTypeList *VariableTypeListSemanticAction(VariableType *variableType, Var
 	return variableTypeList;
 }
 
-Variable *VariableSemanticAction(VariableType *variableType, Expression *expression){
+Variable *VariableSemanticAction(VariableType *variableType) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Variable *assignVariable = malloc(sizeof(Variable));
+	assignVariable->variableType = variableType;
+	assignVariable->expression = NULL;
+	assignVariable->type = UNINITIALIZED;
+	return assignVariable;
+}
+
+Variable *VariableExpressionSemanticAction(VariableType *variableType, Expression *expression){
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Variable *assignVariable = malloc(sizeof(Variable));
 	assignVariable->variableType = variableType;
 	assignVariable->expression = expression;
-	assignVariable->type = TYPE_EXPRESSION;
+	assignVariable->type = EXPRESSION_VAR;
 	return assignVariable;
 }
 
@@ -226,6 +235,7 @@ Variable *VariableArraySemanticAction(VariableType *variableType, ArrayContent *
 	Variable *assignVariable = malloc(sizeof(Variable));
 	assignVariable->variableType = variableType;
 	assignVariable->arrayContent = arrayContent;
+	assignVariable->type = ARRAY_VAR;
 	return assignVariable;
 }
 
@@ -234,6 +244,25 @@ Variable *VariableObjectSemanticAction(VariableType *variableType, ObjectContent
 	Variable *assignVariable = malloc(sizeof(Variable));
 	assignVariable->variableType = variableType;
 	assignVariable->objectContent = objectContent;
+	assignVariable->type = OBJECT_VAR;
+	return assignVariable;
+}
+
+Variable *VariableFunctionCallSemanticAction(VariableType *variableType, FunctionCall *functionCall) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Variable *assignVariable = malloc(sizeof(Variable));
+	assignVariable->variableType = variableType;
+	assignVariable->functionCall = functionCall;
+	assignVariable->type = FUNCTIONCALL_VAR;
+	return assignVariable;
+}
+
+Variable *VariableArrowFunctionSemanticAction(VariableType *variableType, ArrowFunction *arrowFunction) {
+	_logSyntacticAnalyzerAction(__FUNCTION__);
+	Variable *assignVariable = malloc(sizeof(Variable));
+	assignVariable->variableType = variableType;
+	assignVariable->arrowFunction = arrowFunction;
+	assignVariable->type = ARROWFUNCTION_VAR;
 	return assignVariable;
 }
 
@@ -298,36 +327,22 @@ IterableVariable *IterableVariableObjectContentSemanticAction(ObjectContent *obj
 
 
 // Declaration -------------------------------------------------------------------------------------------------------------------------
-Declaration *DeclarationSemanticAction(DeclarationType type, VariableType *variableType, Expression *expression) {
+Declaration *DeclarationSemanticAction(DeclarationType type, VariableType *variableType) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Declaration *declaration = malloc(sizeof(Declaration));
 	declaration->variable = malloc(sizeof(Variable));
 	declaration->variable->variableType = variableType;
-	declaration->variable->expression = expression;
-	declaration->variable->type = TYPE_EXPRESSION;
+	declaration->variable->type = UNINITIALIZED;
 	declaration->type = type;
 	return declaration;
 }
 
-Declaration *DeclarationArraySemanticAction(DeclarationType type, VariableType *variableType, ArrayContent *arrayContent) {
+Declaration *DeclarationVariableSemanticAction(DeclarationType type, Variable *variable) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	Declaration *declaration = malloc(sizeof(Declaration));
-	declaration->type = type;
 	declaration->variable = malloc(sizeof(Variable));
-	declaration->variable->variableType = variableType;
-	declaration->variable->arrayContent = arrayContent;
-	declaration->variable->type = TYPE_ARRAY;
-	return declaration;
-}
-
-Declaration *DeclarationObjectSemanticAction(DeclarationType type, VariableType *variableType, ObjectContent *objectContent) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	Declaration *declaration = malloc(sizeof(Declaration));
+	declaration->variable = variable;
 	declaration->type = type;
-	declaration->variable = malloc(sizeof(Variable));
-	declaration->variable->variableType = variableType;
-	declaration->variable->objectContent = objectContent;
-	declaration->variable->type = TYPE_OBJECT;
 	return declaration;
 }
 

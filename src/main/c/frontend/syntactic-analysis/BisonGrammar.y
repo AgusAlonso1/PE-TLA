@@ -293,15 +293,11 @@ objectContent: ID COLON expression 																											{ $$ = ObjectConte
 	;
 
 // Variable declaration and assignment -----------------------------------------------------------------------------------------------------------------
-declaration: LET variableType ASSIGN expression																								{ $$ = DeclarationSemanticAction(LET_DT, $2, $4); }
-	| LET variableType																														{ $$ = DeclarationSemanticAction(LET_DT, $2, NULL); }
-	| LET variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(LET_DT, $2, $5); }
-	| LET variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																			{ $$ = DeclarationObjectSemanticAction(LET_DT, $2, $5); }
-	| CONST variableType ASSIGN expression 								       																{ $$ = DeclarationSemanticAction(CONST_DT, $2, $4); }
-	| CONST variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(CONST_DT, $2, $5); }
-	| VAR variableType ASSIGN expression																									{ $$ = DeclarationSemanticAction(VAR_DT, $2, $4); }
-	| VAR variableType																														{ $$ = DeclarationSemanticAction(VAR_DT, $2, NULL); }
-	| VAR variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																		{ $$ = DeclarationArraySemanticAction(VAR_DT, $2, $5); }
+declaration: LET variable																													{ $$ = DeclarationVariableSemanticAction(LET_DT, $2); }
+	| LET variableType																														{ $$ = DeclarationSemanticAction(LET_DT, $2); }
+	| CONST variable 								       																					{ $$ = DeclarationVariableSemanticAction(CONST_DT, $2); }
+	| VAR variable																															{ $$ = DeclarationVariableSemanticAction(VAR_DT, $2); }
+	| VAR variableType																														{ $$ = DeclarationSemanticAction(VAR_DT, $2); }
 	;
 
 typeDeclaration: TYPE ID ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																		{ $$ = ObjectTypeDeclarationSemanticAction($2, $5); }
@@ -311,9 +307,11 @@ typeDeclaration: TYPE ID ASSIGN OPEN_BRACE objectContent CLOSE_BRACE												
 	| INTERFACE ID OPEN_BRACE variableTypeList CLOSE_BRACE 																					{ $$ = InterfaceTypeDeclarationSemanticAction($2,$4); }
 	;
 
-variable: variableType ASSIGN expression																									{ $$ = VariableSemanticAction($1, $3); }
+variable: variableType ASSIGN expression																									{ $$ = VariableExpressionSemanticAction($1, $3); }
 	| variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																			{ $$ = VariableArraySemanticAction($1, $4); }
 	| variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																				{ $$ = VariableObjectSemanticAction($1, $4); }
+	/* | variableType ASSIGN functionCall																										{ $$ = VariableFunctionCallSemanticAction($1,$3); }
+	| variableType ASSIGN arrowFunction																										{ $$ = VariableArrowFunctionSemanticAction($1, $3); } */
 	;
 
 variableTypeList: variableType																												{ $$ = VariableTypeListSemanticAction($1, NULL); }

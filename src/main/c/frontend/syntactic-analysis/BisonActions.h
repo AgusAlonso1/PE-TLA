@@ -38,16 +38,19 @@ Type *ArrayTypeSemanticAction(char *id);
 DataType getDataType(char *name);
 VariableType *VariableTypeSemanticAction(char *id, Type *type);
 VariableTypeList *VariableTypeListSemanticAction(VariableType *variableType, VariableTypeList *next);
-Variable *VariableSemanticAction(VariableType *variableType, Expression *expression);
+
+Variable *VariableExpressionSemanticAction(VariableType *variableType, Expression *expression);
 Variable *VariableArraySemanticAction(VariableType *variableType, ArrayContent *arrayContent);
 Variable *VariableObjectSemanticAction(VariableType *variableType, ObjectContent *objectContent);
+Variable *VariableFunctionCallSemanticAction(VariableType *variableType, FunctionCall *functionCall);
+Variable *VariableArrowFunctionSemanticAction(VariableType *variableType, ArrowFunction *arrowFunction);
+
 PromiseReturnType *PromiseReturnTypeSemanticAction(Type *returnType);
 ObjectContent *ObjectContentSemanticAction(char *key, Expression *expression, ObjectContent *next);
 ArrayContent *ArrayContentSemanticAction(Expression *expression, ArrayContent *next);
 
-Declaration *DeclarationSemanticAction(DeclarationType type, VariableType *variableType, Expression *expression);
-Declaration *DeclarationArraySemanticAction(DeclarationType type, VariableType *variableType, ArrayContent *arrayContent);
-Declaration *DeclarationObjectSemanticAction(DeclarationType type, VariableType *variableType, ObjectContent *objectContent);
+Declaration *DeclarationSemanticAction(DeclarationType type, VariableType *variableType);
+Declaration *DeclarationVariableSemanticAction(DeclarationType type, Variable *variable);
 
 TypeDeclaration *ObjectTypeDeclarationSemanticAction(char *id, ObjectContent *objectContent);
 TypeDeclaration *VariableTypeDeclarationSemanticAction(char *id, Expression *expression);

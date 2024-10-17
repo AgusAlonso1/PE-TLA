@@ -23,12 +23,12 @@ typedef enum IncDecType IncDecType;
 typedef enum IncDecPosition IncDecPosition;
 typedef enum ForLoopType ForLoopType;
 typedef enum IterableType IterableType;
+typedef enum Assign Assign;
 typedef enum UserType UserType;
 
 typedef struct Type Type;
 typedef struct TypeDeclaration TypeDeclaration;
 typedef struct IterableVariable IterableVariable;
-typedef struct Assign Assign;
 
 typedef struct Constant Constant;
 typedef struct ArrayContent ArrayContent;
@@ -139,7 +139,16 @@ enum DataType {
 	VOID_ARRAY,
 	UNDEF_ARRAY,
 	NEVER_ARRAY,
-	UNK_ARRAY, // unknown array
+	UNK_ARRAY // unknown array
+};
+
+enum Assign {
+	OBJECT_VAR,
+	ARRAY_VAR,
+	FUNCTIONCALL_VAR,
+	ARROWFUNCTION_VAR,
+	EXPRESSION_VAR,
+	UNINITIALIZED
 };
 
 enum UserType {
@@ -198,18 +207,10 @@ struct Variable {
 		Expression *expression;
 		ArrayContent *arrayContent;
 		ObjectContent *objectContent;
+		FunctionCall *functionCall;
+		ArrowFunction *arrowFunction;
 	};
-	UserType type;
-};
-
-struct Assign {
-	char *id;
-	union {
-		Expression *expression;
-		ArrayContent *arrayContent;
-		ObjectContent *objectContent;
-	};
-	UserType type;
+	Assign type;
 };
 
 struct PromiseReturnType {
