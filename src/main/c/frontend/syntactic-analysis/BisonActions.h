@@ -95,7 +95,6 @@ Statement *DeclarationStatementSemanticAction(Declaration *declaration);
 Statement *TypeDeclarationStatementSemanticAction(TypeDeclaration *typeDeclaration);
 Statement *FunctionCallStatementSemanticAction(FunctionCall *functionCall);
 Statement *FunctionDeclarationStatementSemanticAction(FunctionDeclaration *functionDeclaration);
-Statement *ArrowFunctionStatementSemanticAction(ArrowFunction *arrowFunction);
 Statement *AsyncFunctionStatementSemanticAction(AsyncFunction *asyncFunction);
 Statement *WhileStatementSemanticAction(WhileLoop *whileLoop);
 Statement *ExpressionStatementSemanticAction(Expression *expression);

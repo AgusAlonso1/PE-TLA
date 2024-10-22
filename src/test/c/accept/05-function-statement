@@ -6,11 +6,12 @@ fun(b)
 
 
 const asyncFunctionName = async (a: number) => {
-  return a + 2;
-};
-
-async function callAsyncFunction() {
-  const result = await asyncFunctionName(5);
+  return a + 2
 }
 
-callAsyncFunction();
+async function callAsyncFunction() {
+  const result = await asyncFunctionName(5)
+}
+
+callAsyncFunction()
+

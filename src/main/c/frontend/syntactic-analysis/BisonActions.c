@@ -664,17 +664,6 @@ Statement *FunctionDeclarationStatementSemanticAction(FunctionDeclaration *funct
 	return stat;
 }
 
-Statement *ArrowFunctionStatementSemanticAction(ArrowFunction *arrowFunction) {
-	_logSyntacticAnalyzerAction(__FUNCTION__);
-	if (arrowFunction == NULL) {
-		return NULL;
-	}
-	Statement *stat = malloc(sizeof(Code));
-	stat->statement = ARROW_FUNCTION_ST;
-	stat->arrowFunction = arrowFunction;
-	return stat;
-}
-
 Statement *AsyncFunctionStatementSemanticAction(AsyncFunction *asyncFunction) {
 	_logSyntacticAnalyzerAction(__FUNCTION__);
 	if (asyncFunction == NULL) {

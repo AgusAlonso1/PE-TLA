@@ -410,7 +410,6 @@ struct Statement {
 		Variable *variable;
 		FunctionCall *functionCall;
 		FunctionDeclaration *FunctionDeclaration;
-		ArrowFunction *arrowFunction;
 		AsyncFunction *asyncFunction;
 		TypeDeclaration *typeDeclaration;
 		IncDec *incDec;

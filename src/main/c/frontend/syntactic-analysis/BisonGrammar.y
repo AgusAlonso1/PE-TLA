@@ -201,7 +201,7 @@
 %nonassoc IF
 %nonassoc ELSE
 %nonassoc CLOSE_BRACE
-%nonassoc OPEN_PARENTHESIS CLOSE_PARENTHESIS
+%nonassoc ARROW
 
 %left ADD SUB
 %left MUL DIV
@@ -210,7 +210,6 @@
 %left AND 
 %left OR
 %right NOT
-%right ARROW
 %right ASSIGN
 
 
@@ -218,12 +217,12 @@
 
 // IMPORTANT: To use λ in the following grammar, use the %empty symbol.
 
-program: code 																																{ $$ = CodeProgramSemanticAction(currentCompilerState(),$1); }
+program: code 																															{ $$ = CodeProgramSemanticAction(currentCompilerState(),$1); }
 	;
 
 // Code -----------------------------------------------------------------------------------------------------------------
-code: statement 																															{ $$ = CodeSemanticAction($1, NULL); }
-	| statement code																														{ $$ = CodeSemanticAction($1, $2); }
+code: statement 																														{ $$ = CodeSemanticAction($1, NULL); }
+	| statement code																													{ $$ = CodeSemanticAction($1, $2); }
 	;
 
 statement: declaration 															 	 													{ $$ = DeclarationStatementSemanticAction($1); }
@@ -235,7 +234,6 @@ statement: declaration 															 	 													{ $$ = DeclarationStatemen
 	| functionDeclaration  																												{ $$ = FunctionDeclarationStatementSemanticAction($1); }
 	| functionCall																														{ $$ = FunctionCallStatementSemanticAction($1); }
 	| asyncFunction  																													{ $$ = AsyncFunctionStatementSemanticAction($1); }
-	| arrowFunction  																													{ $$ = ArrowFunctionStatementSemanticAction($1); }
 	| variable																															{ $$ = VariableStatementSemanticAction($1); }
 	;
 
@@ -246,7 +244,8 @@ incDec: INCREMENT expression																											{ $$ = IncDecSemanticActi
 	| expression DECREMENT																												{ $$ = IncDecSemanticAction($1, DEC_OP, POSTFIX); }
     ;
 
-expression: expression[left] ADD expression[right] 																						{ $$ = ExpressionSemanticAction($left, $right, ADD_OP); }
+expression: factor																														{ $$ = FactorExpressionSemanticAction($1); }
+	| expression[left] ADD expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, ADD_OP); }
 	| expression[left] SUB expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, SUB_OP); }
 	| expression[left] MUL expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, MUL_OP); }
 	| expression[left] DIV expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, DIV_OP); }
@@ -261,12 +260,11 @@ expression: expression[left] ADD expression[right] 																						{ $$ = 
 	| expression[left] OR expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, OR_OP); }
 	| expression[left] AND expression[right] 																							{ $$ = ExpressionSemanticAction($left, $right, AND_OP); }
 	| NOT expression 																													{ $$ = ExpressionSemanticAction($2, NULL, NOT_OP); }
-	| factor																															{ $$ = FactorExpressionSemanticAction($1); }
 	;
 
 factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS																					{ $$ = ExpressionFactorSemanticAction($2); }
-	| ID																													    		{ $$ = VariableFactorSemanticAction($1); }
 	| constant 																															{ $$ = ConstantFactorSemanticAction($1); }
+	| ID																													    		{ $$ = VariableFactorSemanticAction($1); }
 	;
 
 // Type -------------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,8 +311,8 @@ typeDeclaration: TYPE ID ASSIGN OPEN_BRACE objectContent CLOSE_BRACE												
 variable: variableType ASSIGN expression																									{ $$ = VariableExpressionSemanticAction($1, $3); }
 	| variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																			{ $$ = VariableArraySemanticAction($1, $4); }
 	| variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																				{ $$ = VariableObjectSemanticAction($1, $4); }
-	| variableType ASSIGN arrowFunction	%prec ARROW																							{ $$ = VariableArrowFunctionSemanticAction($1, $3); }
 	| variableType ASSIGN functionCall																										{ $$ = VariableFunctionCallSemanticAction($1,$3); }
+	| variableType ASSIGN arrowFunction																										{ $$ = VariableArrowFunctionSemanticAction($1, $3); }
 	;
 
 variableTypeList: variableType																												{ $$ = VariableTypeListSemanticAction($1, NULL); }
