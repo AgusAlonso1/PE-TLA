@@ -8,7 +8,7 @@ SHELL [ "/bin/bash", "-c" ]
 RUN apt-get update --yes && apt-get install sudo --yes
 
 # Create the 'ubuntu' user and set up the home directory
-RUN useradd --create-home --shell /bin/bash ubuntu
+RUN id -u ubuntu &>/dev/null || useradd --create-home --shell /bin/bash ubuntu
 
 WORKDIR /home/ubuntu
 

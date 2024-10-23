@@ -27,7 +27,7 @@ After that, you can develop outside the container and execute any commands avail
 You need to build a proper image (only when cloning the repository for the first time):
 
 ```bash
-chmod u+x --recursive script/ubuntu
+chmod -R u+x script/ubuntu
 script/ubuntu/docker-build.sh
 ```
 
