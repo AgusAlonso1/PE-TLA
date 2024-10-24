@@ -46,7 +46,7 @@
 	ReturnValue * returnValue;
 	FunctionBody * functionBody;
 	FunctionDeclaration * functionDeclaration; 
-	ArrowFunction * arrowFunction;
+	//ArrowFunction * arrowFunction;
 	AsyncFunction * asyncFunction;
 	//Await * await;
 	FunctionCall * functionCall;
@@ -191,7 +191,7 @@
 %type <functionDeclaration> functionDeclaration
 %type <functionCall> functionCall
 %type <asyncFunction> asyncFunction
-%type <arrowFunction> arrowFunction
+//%type <arrowFunction> arrowFunction
 
 /**
  * Precedence and associativity.
@@ -312,7 +312,7 @@ variable: variableType ASSIGN expression																									{ $$ = Variable
 	| variableType ASSIGN OPEN_BRACKET arrayContent CLOSE_BRACKET																			{ $$ = VariableArraySemanticAction($1, $4); }
 	| variableType ASSIGN OPEN_BRACE objectContent CLOSE_BRACE																				{ $$ = VariableObjectSemanticAction($1, $4); }
 	| variableType ASSIGN functionCall																										{ $$ = VariableFunctionCallSemanticAction($1,$3); }
-	| variableType ASSIGN arrowFunction																										{ $$ = VariableArrowFunctionSemanticAction($1, $3); }
+	//| variableType ASSIGN arrowFunction																										{ $$ = VariableArrowFunctionSemanticAction($1, $3); }
 	;
 
 variableTypeList: variableType																												{ $$ = VariableTypeListSemanticAction($1, NULL); }
@@ -366,7 +366,7 @@ switchStatement: SWITCH OPEN_PARENTHESIS ID[id] CLOSE_PARENTHESIS OPEN_BRACE swi
 	| AWAIT asyncFunction																													{ $$ = AwaitAsyncFunctionSemanticAction($2); }
 	; */
 returnValue: RETURN expression 																												{ $$ = ReturnExpressionSemanticAction($2); }
-	| RETURN arrowFunction 																													{ $$ = ReturnArrowFunctionSemanticAction($2); }
+	//| RETURN arrowFunction 																													{ $$ = ReturnArrowFunctionSemanticAction($2); }
 	| RETURN functionCall 																													{ $$ = ReturnFunctionCallSemanticAction($2); }
 	//| RETURN await
 	| RETURN asyncFunction 																													{ $$ = ReturnAsyncFunctionSemanticAction($2); }
@@ -393,9 +393,9 @@ functionCall: ID[id] OPEN_PARENTHESIS argumentList[arg] CLOSE_PARENTHESIS	%prec 
 asyncFunction: ASYNC FUNCTION ID[id] OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS promiseReturnType[promise] OPEN_BRACE functionBody[body] %prec CLOSE_BRACE CLOSE_BRACE 	{ $$ = AsyncFunctionSemanticAction($id, $arg, $promise, $body); }
 	;
 
-arrowFunction: OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS COLON type[return] ARROW OPEN_BRACE functionBody[body] CLOSE_BRACE 	%prec ARROW							{ $$ = ArrowFunctionSemanticAction($arg, $return, $body); }
+/* arrowFunction: OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS COLON type[return] ARROW OPEN_BRACE functionBody[body] CLOSE_BRACE 	%prec ARROW							{ $$ = ArrowFunctionSemanticAction($arg, $return, $body); }
 	| OPEN_PARENTHESIS variableTypeList[arg] CLOSE_PARENTHESIS ARROW OPEN_BRACE functionBody[body] CLOSE_BRACE 	%prec ARROW														{ $$ = ArrowFunctionSemanticAction($arg, NULL, $body); }
-	;
+	; */
 
 
 %%
